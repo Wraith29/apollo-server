@@ -1,49 +1,72 @@
 package data
 
 import (
-	"encoding/json"
-	"os"
+	"strings"
 
-	"github.com/wraith29/apollo/internal/config"
+	"github.com/spf13/viper"
+	mb "github.com/wraith29/apollo/internal/data/musicbrainz"
+	"github.com/wraith29/apollo/internal/model"
+	"gorm.io/gorm"
 )
 
-type Genre struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+func ArtistExists(db *gorm.DB, artistId string) bool {
+	var exists int64 = 0
+
+	db.Raw("SELECT EXISTS (SELECT 1 FROM `artists`)").Scan(&exists)
+
+	return exists != 0
 }
 
-type Album struct {
-	Id               string  `json:"id"`
-	Name             string  `json:"name"`
-	Genres           []Genre `json:"genres"`
-	Listened         bool    `json:"listened"`
-	LatestListenDate string  `json:"latest-listen-date"`
-}
+func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
+	ignoreWithSecondaryTypes := viper.GetBool("ignore-with-secondary-types")
 
-type Artist struct {
-	Id     string  `json:"id"`
-	Name   string  `json:"string"`
-	Genres []Genre `json:"genres"`
-	Albums []Album `json:"albums"`
-}
+	genres := make([]model.Genre, 0)
 
-func LoadAllArtists() ([]Artist, error) {
-	fileContents, err := os.ReadFile(config.DataFile)
-	if err != nil {
-		return nil, err
+	for _, genre := range mbArtist.Genres {
+		genres = append(genres, model.Genre{
+			Id:     genre.Id,
+			Name:   genre.Name,
+			Rating: 0,
+		})
 	}
 
-	artists := make([]Artist, 0)
+	albums := make([]model.Album, 0)
 
-	err = json.Unmarshal(fileContents, &artists)
-	return artists, err
-}
+	for _, album := range mbArtist.ReleaseGroups {
+		if strings.ToLower(album.PrimaryType) != "album" || (ignoreWithSecondaryTypes && len(album.SecondaryTypes) > 0) {
+			continue
+		}
 
-func SaveArtists(artists []Artist) error {
-	jsonData, err := json.Marshal(&artists)
-	if err != nil {
-		return err
+		albumGenres := make([]model.Genre, 0)
+
+		for _, genre := range album.Genres {
+			albumGenres = append(albumGenres, model.Genre{
+				Id:     genre.Id,
+				Name:   genre.Name,
+				Rating: 0,
+			})
+		}
+
+		albums = append(albums, model.Album{
+			Id:           album.Id,
+			ArtistId:     mbArtist.Id,
+			Name:         album.Title,
+			Listened:     false,
+			ListenedDate: "",
+			Genres:       albumGenres,
+		})
 	}
 
-	return os.WriteFile(config.DataFile, jsonData, os.ModeExclusive)
+	db.Create(&genres)
+	db.Create(&albums)
+
+	artist := model.Artist{
+		Id:     mbArtist.Id,
+		Name:   mbArtist.Name,
+		Genres: genres,
+	}
+
+	db.Create(&artist)
+
+	return db.Error
 }

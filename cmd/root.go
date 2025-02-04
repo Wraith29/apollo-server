@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
 	"path"
 
 	"github.com/spf13/cobra"
-	"github.com/wraith29/apollo/internal"
-	"github.com/wraith29/apollo/internal/config"
+	"github.com/spf13/viper"
+	"github.com/wraith29/apollo/internal/data"
+	"github.com/wraith29/apollo/internal/storage"
 )
 
 var rootCmd = &cobra.Command{
@@ -15,37 +14,43 @@ var rootCmd = &cobra.Command{
 	Short: "Apollo is a music management and recommendation software",
 }
 
-func setupApolloDir() error {
-	apolloDir, err := internal.GetStorageDir()
+func initConfig() error {
+	storageDir, err := storage.GetStorageDir()
 	if err != nil {
 		return err
 	}
-	if err = internal.MkdirIfNotExists(apolloDir); err != nil {
+	if err = storage.MkdirIfNotExists(storageDir); err != nil {
 		return err
 	}
 
-	config.AppRoot = apolloDir
-	config.DataFile = path.Join(config.AppRoot, "apollo.json")
-
-	return nil
-}
-
-func setupDataFile() error {
-	if err := internal.CreateWithDataIfNotExists(config.DataFile, "[]"); err != nil {
+	if err = storage.CreateIfNotExists(path.Join(storageDir, "apollo.db")); err != nil {
 		return err
+	}
+
+	viper.SetConfigName("config")
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(storageDir)
+
+	viper.SetDefault("database-uri", path.Join(storageDir, "apollo.db"))
+	viper.SetDefault("ignored-with-secondary-types", true)
+
+	err = viper.ReadInConfig()
+	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		if err = viper.SafeWriteConfig(); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func init() {
-	if err := setupApolloDir(); err != nil {
-		fmt.Printf("setup apollo dir: %+v\n", err)
-		os.Exit(1)
+	if err := initConfig(); err != nil {
+		panic(err)
 	}
-	if err := setupDataFile(); err != nil {
-		fmt.Printf("setup data file: %+v\n", err)
-		os.Exit(1)
+
+	if err := data.Init(); err != nil {
+		panic(err)
 	}
 
 	rootCmd.AddCommand(addCmd)

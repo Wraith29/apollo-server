@@ -13,14 +13,13 @@ import (
 	mb "github.com/wraith29/apollo/internal/data/musicbrainz"
 )
 
-func selectArtistIdx(artists []mb.Artist) (int, error) {
+func getUserIdxSelection(artists []mb.Artist) (int, error) {
 	fmt.Printf("Select Artist:\n")
 
 	for idx, artist := range artists {
 		extraDetails := ""
 
 		if artist.Disambiguation != "" {
-			// Pad the string with a space on the left to not leave random whitespace
 			extraDetails = fmt.Sprintf(" (%s)", artist.Disambiguation)
 		}
 
@@ -31,58 +30,62 @@ func selectArtistIdx(artists []mb.Artist) (int, error) {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	userInput, err := reader.ReadString('\n')
-	if err != nil {
-		return -1, err
+	selected := -1
+
+	for selected <= 0 || selected > len(artists) {
+		userInput, err := reader.ReadString('\n')
+		if err != nil {
+			return -1, err
+		}
+
+		selected, err = strconv.Atoi(strings.Trim(userInput, "\n"))
+		if err != nil {
+			return -1, err
+		}
+
+		if selected > len(artists) {
+			fmt.Printf("Invalid Choice. Please try again\n")
+		}
 	}
 
-	parsed, err := strconv.Atoi(strings.Trim(userInput, "\n"))
-	if err != nil {
-		return -1, err
-	}
-
-	if parsed > len(artists) {
-		return -1, fmt.Errorf("invalid index. max index = %d", len(artists))
-	}
-
-	return parsed - 1, nil
+	return selected - 1, nil
 }
 
 func addArtist(artistName string) error {
-	currentArtists, err := data.LoadAllArtists()
+	db, err := data.GetDB()
 	if err != nil {
 		return err
 	}
 
-	searchResults, err := mb.SearchArtist(artistName)
+	searchData, err := mb.SearchArtist(artistName)
 	if err != nil {
 		return err
 	}
 
-	artistChoice := 0
-	if len(searchResults.Artists) > 1 {
-		artistChoice, err = selectArtistIdx(searchResults.Artists)
+	selectedArtistIdx := 0
+	if len(searchData.Artists) > 1 {
+		selectedArtistIdx, err = getUserIdxSelection(searchData.Artists)
 		if err != nil {
 			return err
 		}
 	}
 
-	selectedArtist := searchResults.Artists[artistChoice]
+	selectedArtist := searchData.Artists[selectedArtistIdx]
 
-	for _, savedArtist := range currentArtists {
-		if savedArtist.Id == selectedArtist.Id {
-			return fmt.Errorf("cannot add %s. artist already saved", selectedArtist.Name)
-		}
+	if data.ArtistExists(db, selectedArtist.Id) {
+		return errors.New("cannot re-add existing artist")
 	}
 
-	artistData, err := mb.LookupArtist(selectedArtist.Id)
+	lookupData, err := mb.LookupArtist(selectedArtist.Id)
 	if err != nil {
 		return err
 	}
 
-	currentArtists = append(currentArtists, artistData.ToCustomArtist())
+	if err = data.SaveMusicBrainzArtist(db, lookupData); err != nil {
+		return err
+	}
 
-	return data.SaveArtists(currentArtists)
+	return nil
 }
 
 var addCmd = &cobra.Command{
@@ -90,7 +93,7 @@ var addCmd = &cobra.Command{
 	Short: "Add an artist to your library",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("missing required argument: <artist_name>")
+			return errors.New("missing required argument: artist_name")
 		}
 
 		return nil

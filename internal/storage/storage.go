@@ -1,4 +1,4 @@
-package internal
+package storage
 
 import (
 	"errors"
@@ -40,18 +40,40 @@ func CreateWithDataIfNotExists(path, contents string) error {
 		return err
 	}
 
-	if !exists {
-		f, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-
-		if _, err := f.WriteString(contents); err != nil {
-			return err
-		}
-
-		f.Close()
+	if exists {
+		return nil
 	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	if _, err := f.WriteString(contents); err != nil {
+		return err
+	}
+
+	f.Close()
+
+	return nil
+}
+
+func CreateIfNotExists(path string) error {
+	exists, err := PathExists(path)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return nil
+	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	f.Close()
 
 	return nil
 }
