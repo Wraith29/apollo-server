@@ -34,7 +34,9 @@ func getAlbumToRecommend(genres []string) error {
 		return nil
 	}
 
-	data.SaveRecommendation(db, album)
+	if err := data.SaveRecommendation(db, album); err != nil {
+		return err
+	}
 
 	fmt.Printf("You should listen to: '%s' by %s\n", album.Name, album.ArtistName)
 

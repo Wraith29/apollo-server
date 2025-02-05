@@ -7,12 +7,13 @@ import (
 	mb "github.com/wraith29/apollo/internal/data/musicbrainz"
 	"github.com/wraith29/apollo/internal/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func ArtistExists(db *gorm.DB, artistId string) bool {
 	var exists int64 = 0
 
-	db.Raw("SELECT EXISTS (SELECT 1 FROM `artist`)").Scan(&exists)
+	db.Raw("SELECT EXISTS (SELECT 1 FROM `artist` WHERE `id` = ?)", artistId).Scan(&exists)
 
 	return exists != 0
 }
@@ -57,7 +58,7 @@ func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
 		})
 	}
 
-	db.Create(&genres)
+	db.Clauses(clause.OnConflict{DoNothing: true}).Create(&genres)
 	db.Create(&albums)
 
 	artist := model.Artist{

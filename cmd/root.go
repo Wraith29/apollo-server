@@ -32,7 +32,7 @@ func initConfig() error {
 	viper.AddConfigPath(storageDir)
 
 	viper.SetDefault("database-uri", path.Join(storageDir, "apollo.db"))
-	viper.SetDefault("ignored-with-secondary-types", true)
+	viper.SetDefault("ignore-with-secondary-types", true)
 
 	err = viper.ReadInConfig()
 	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
