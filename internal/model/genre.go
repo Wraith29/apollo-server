@@ -7,3 +7,7 @@ type Genre struct {
 	Albums  []Album  `gorm:"many2many:album_genre"`
 	Artists []Artist `gorm:"many2many:artist_genre"`
 }
+
+func (g Genre) TableName() string {
+	return "genre"
+}

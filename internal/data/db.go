@@ -17,7 +17,7 @@ func Init() error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&model.Genre{}, &model.Artist{}, &model.Album{}); err != nil {
+	if err = db.AutoMigrate(&model.Genre{}, &model.Artist{}, &model.Album{}, &model.Recommendation{}); err != nil {
 		return err
 	}
 

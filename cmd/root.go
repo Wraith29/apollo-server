@@ -54,6 +54,7 @@ func init() {
 	}
 
 	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(recCmd)
 }
 
 func Execute() error {

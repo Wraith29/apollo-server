@@ -12,7 +12,7 @@ import (
 func ArtistExists(db *gorm.DB, artistId string) bool {
 	var exists int64 = 0
 
-	db.Raw("SELECT EXISTS (SELECT 1 FROM `artists`)").Scan(&exists)
+	db.Raw("SELECT EXISTS (SELECT 1 FROM `artist`)").Scan(&exists)
 
 	return exists != 0
 }
@@ -52,7 +52,7 @@ func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
 			ArtistId:     mbArtist.Id,
 			Name:         album.Title,
 			Listened:     false,
-			ListenedDate: "",
+			ListenedDate: nil,
 			Genres:       albumGenres,
 		})
 	}

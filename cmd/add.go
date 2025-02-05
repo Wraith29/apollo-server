@@ -91,14 +91,11 @@ func addArtist(artistName string) error {
 var addCmd = &cobra.Command{
 	Use:   "add artist_name",
 	Short: "Add an artist to your library",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("missing required argument: artist_name")
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := addArtist(args[0]); err != nil {
+			fmt.Printf("Error: %s\n", err.Error())
+			os.Exit(1)
 		}
-
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return addArtist(args[0])
 	},
 }
