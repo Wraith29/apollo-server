@@ -4,6 +4,9 @@ Music Recommendation App.
 
 Add all of your favourite artists, and ones you want to get to know better - and simply run `apollo recommend` to get a random Album to listen to.
 
+> [!TODO]
+> Investigate the potential migration from [gorm](https://gorm.io) to [sqlc](https://github.com/sqlc-dev/sqlc) instead
+
 ## Features
 
 - [x] [Add](#add-new-artist)
@@ -98,7 +101,7 @@ apollo list recs
 
 This command will go through each of your artists, and check to see if they have released any new albums.
 
-> [Dev Note]
+> [!Dev Note]
 > Need to consider the best way to do this while keeping MusicBrainz rate limit (1 req/s) in mind.
 > May need to try and run this as a background process with some sort of debouncer to prevent hitting the rate limit,
 > without blocking the user for (artist count) seconds
