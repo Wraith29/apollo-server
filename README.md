@@ -6,9 +6,9 @@ Add all of your favourite artists, and ones you want to get to know better - and
 
 ## Features
 
-- [x] [Add](#-add-new-artist)
-- [x] [Recommend](#-recommend)
-- [x] [Rate](#-rate)
+- [x] [Add](#add-new-artist)
+- [x] [Recommend](#recommend)
+- [x] [Rate](#rate)
 
 ### Add new artist
 
