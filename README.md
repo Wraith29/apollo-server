@@ -9,6 +9,8 @@ Add all of your favourite artists, and ones you want to get to know better - and
 - [x] [Add](#add-new-artist)
 - [x] [Recommend](#recommend)
 - [x] [Rate](#rate)
+- [ ] [List](#list)
+- [ ] [Update](#update)
 
 ### Add new artist
 
@@ -57,3 +59,47 @@ Rate the most recent recommendation given to you by apollo.
 | 1      | I didn't like this album |
 | 2      | This album was ok |
 | 3      | I liked this album |
+
+### List
+
+The following commands will all list 10 of the specified item, unless the `[-a / --all]` flag is provided.
+
+#### Artists
+
+Usage:
+
+```sh
+apollo list artist
+```
+
+#### Genres
+
+Usage:
+
+```sh
+apollo list genres
+```
+
+#### Recommendations
+
+Usage:
+
+```sh
+apollo list recommendations
+```
+
+Or
+
+```sh
+apollo list recs
+```
+
+### Update
+
+This command will go through each of your artists, and check to see if they have released any new albums.
+
+> [Dev Note]
+> Need to consider the best way to do this while keeping MusicBrainz rate limit (1 req/s) in mind.
+> May need to try and run this as a background process with some sort of debouncer to prevent hitting the rate limit,
+> without blocking the user for (artist count) seconds
+
