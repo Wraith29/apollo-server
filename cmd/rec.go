@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,6 +17,26 @@ func getAlbumToRecommend(genres []string) error {
 	db, err := data.GetDB()
 	if err != nil {
 		return err
+	}
+
+	latestRecIsRated, err := data.IsLatestRecommendationRated(db)
+	if err != nil {
+		return err
+	}
+
+	if !latestRecIsRated {
+		fmt.Print("Looks like you didn't rate your most recent recommendation. Would you like to do that now? (y/n)\n> ")
+
+		reader := bufio.NewReader(os.Stdin)
+
+		exit, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+
+		if strings.ToLower(strings.Trim(exit, "\n")) == "y" {
+			return nil
+		}
 	}
 
 	album, err := data.GetRandomAlbum(db, genres, includeListened)
@@ -52,7 +74,7 @@ func init() {
 }
 
 var recCmd = &cobra.Command{
-	Use:     "recommend [genres... (Max 3)]",
+	Use:     "recommend [genres... (Max 3)] [-l / --listened]",
 	Aliases: []string{"rec"},
 	Short:   "Recommend an album, based on your tastes. Include up to 3 genres to filter down what you want to listen to.",
 	Args:    cobra.MaximumNArgs(3),

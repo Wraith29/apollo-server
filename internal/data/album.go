@@ -3,7 +3,9 @@ package data
 import (
 	"fmt"
 	"math/rand/v2"
+	"time"
 
+	"github.com/wraith29/apollo/internal/model"
 	"gorm.io/gorm"
 )
 
@@ -46,4 +48,26 @@ func GetRandomAlbum(db *gorm.DB, genreNames []string, includeListened bool) (*re
 	albumIdx := rand.IntN(len(albums))
 
 	return &albums[albumIdx], nil
+}
+
+func RateAlbum(db *gorm.DB, albumId string, recId uint, rating int) error {
+	db.Exec("UPDATE album SET `rating` = `rating` + ? WHERE `id` = ?", rating, albumId)
+	db.Exec("UPDATE artist SET `rating` = `rating` + ? WHERE `id` IN (SELECT `artist_id` FROM album WHERE album.`id` = ?)", rating, albumId)
+	db.Exec("UPDATE genre SET `rating` = `rating` + ? WHERE `id` IN (SELECT `genre_id` FROM album_genre WHERE `album_id` = ?)", rating, albumId)
+
+	db.Table("recommendation").Where("id = ?", recId).Update("rated", true)
+
+	return db.Error
+}
+
+func MarkAlbumAsListened(db *gorm.DB, albumId string) error {
+	now := time.Now()
+
+	db.Table("album").Updates(&model.Album{
+		Id:           albumId,
+		Listened:     true,
+		ListenedDate: &now,
+	})
+
+	return db.Error
 }

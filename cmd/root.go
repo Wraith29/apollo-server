@@ -55,6 +55,7 @@ func init() {
 
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(recCmd)
+	rootCmd.AddCommand(rateCmd)
 }
 
 func Execute() error {
