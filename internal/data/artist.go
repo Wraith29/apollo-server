@@ -71,3 +71,19 @@ func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
 
 	return db.Error
 }
+
+func GetArtists(db *gorm.DB, listAll bool) ([]model.Artist, error) {
+	artists := make([]model.Artist, 0)
+
+	query := db.Order(
+		clause.OrderByColumn{Column: clause.Column{Name: "rating"}, Desc: true},
+	)
+
+	if !listAll {
+		query.Limit(10)
+	}
+
+	query.Find(&artists)
+
+	return artists, db.Error
+}
