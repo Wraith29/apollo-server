@@ -1,54 +1,29 @@
 package cmd
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/wraith29/apollo/internal/data"
 	mb "github.com/wraith29/apollo/internal/data/musicbrainz"
 )
 
-func getUserIdxSelection(artists []mb.Artist) (int, error) {
-	fmt.Printf("Select Artist:\n")
+func getArtistWithShortestDistance(artists []mb.Artist, searchTerm string) int {
+	artistIndex := 0
+	minDistance := 100
 
-	for idx, artist := range artists {
-		extraDetails := ""
+	for index, artist := range artists {
+		distance := data.LevenshteinDistance(artist.Name, searchTerm)
 
-		if artist.Disambiguation != "" {
-			extraDetails = fmt.Sprintf(" (%s)", artist.Disambiguation)
-		}
-
-		fmt.Printf("Artist %d: %s%s\n", idx+1, artist.Name, extraDetails)
-	}
-
-	fmt.Printf("> ")
-
-	reader := bufio.NewReader(os.Stdin)
-
-	selected := -1
-
-	for selected <= 0 || selected > len(artists) {
-		userInput, err := reader.ReadString('\n')
-		if err != nil {
-			return -1, err
-		}
-
-		selected, err = strconv.Atoi(strings.Trim(userInput, "\n"))
-		if err != nil {
-			return -1, err
-		}
-
-		if selected > len(artists) {
-			fmt.Printf("Invalid Choice. Please try again\n")
+		if distance < minDistance {
+			artistIndex = index
+			minDistance = distance
 		}
 	}
 
-	return selected - 1, nil
+	return artistIndex
 }
 
 func addArtist(artistName string) error {
@@ -67,21 +42,13 @@ func addArtist(artistName string) error {
 		return nil
 	}
 
-	selectedArtistIdx := 0
-	if len(searchData.Artists) > 1 {
-		selectedArtistIdx, err = getUserIdxSelection(searchData.Artists)
-		if err != nil {
-			return err
-		}
-	}
+	artist := searchData.Artists[getArtistWithShortestDistance(searchData.Artists, artistName)]
 
-	selectedArtist := searchData.Artists[selectedArtistIdx]
-
-	if data.ArtistExists(db, selectedArtist.Id) {
+	if data.ArtistExists(db, artist.Id) {
 		return errors.New("cannot re-add existing artist")
 	}
 
-	lookupData, err := mb.LookupArtist(selectedArtist.Id)
+	lookupData, err := mb.LookupArtist(artist.Id)
 	if err != nil {
 		return err
 	}
