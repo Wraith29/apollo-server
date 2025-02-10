@@ -56,7 +56,7 @@ func GetRecommendations(db *gorm.DB, listAll bool) ([]recommendationListModel, e
 	query := db.Table("recommendation R").
 		Select("R.`id`, R.`date`, R.`rated`, A.`name` AS album_name").
 		InnerJoins("INNER JOIN album A ON A.`id` = R.`album_id`").
-		Order("R.`id` ASC")
+		Order("R.`id` DESC")
 
 	if !listAll {
 		query.Limit(10)
