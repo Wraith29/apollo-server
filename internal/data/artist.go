@@ -59,8 +59,13 @@ func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
 		})
 	}
 
-	db.Clauses(clause.OnConflict{DoNothing: true}).Create(&genres)
-	db.Create(&albums)
+	if len(genres) > 0 {
+		db.Clauses(clause.OnConflict{DoNothing: true}).Create(&genres)
+	}
+
+	if len(albums) > 0 {
+		db.Create(&albums)
+	}
 
 	artist := model.Artist{
 		Id:     mbArtist.Id,
@@ -73,8 +78,11 @@ func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
 	return db.Error
 }
 
-func GetArtists(db *gorm.DB, listAll bool) ([]model.Artist, error) {
+func GetArtists(db *gorm.DB, listAll bool) (model.ListResult[model.Artist], error) {
 	artists := make([]model.Artist, 0)
+
+	var count int
+	db.Raw("SELECT COUNT(id) FROM `artist`").Scan(&count)
 
 	query := db.Order(
 		clause.OrderByColumn{Column: clause.Column{Name: "rating"}, Desc: true},
@@ -86,5 +94,8 @@ func GetArtists(db *gorm.DB, listAll bool) ([]model.Artist, error) {
 
 	query.Find(&artists)
 
-	return artists, db.Error
+	return model.ListResult[model.Artist]{
+		Count:   count,
+		Results: artists,
+	}, db.Error
 }

@@ -22,8 +22,17 @@ func listRecommendations() error {
 		return err
 	}
 
-	for _, recommendation := range recommendations {
+	for _, recommendation := range recommendations.Results {
 		fmt.Printf("%d: %s\n", recommendation.Id, recommendation.AlbumName)
+	}
+
+	switch {
+	case !listAll && recommendations.Count > 10:
+		fmt.Printf("Displaying 10/%d recommendations\n", recommendations.Count)
+	case !listAll:
+		fmt.Printf("Displaying your 10 most recent recommendations\n")
+	case listAll:
+		fmt.Printf("Displaying all %d recommendations\n", recommendations.Count)
 	}
 
 	return nil

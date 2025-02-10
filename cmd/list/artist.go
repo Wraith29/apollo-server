@@ -22,8 +22,17 @@ func listArtists() error {
 		return err
 	}
 
-	for _, artist := range artists {
+	for _, artist := range artists.Results {
 		fmt.Printf("%s: %d\n", artist.Name, artist.Rating)
+	}
+
+	switch {
+	case !listAll && artists.Count > 10:
+		fmt.Printf("Displaying 10/%d artists\n", artists.Count)
+	case !listAll:
+		fmt.Printf("Displaying your top 10 artists\n")
+	case listAll:
+		fmt.Printf("Displaying %d artists\n", artists.Count)
 	}
 
 	return nil

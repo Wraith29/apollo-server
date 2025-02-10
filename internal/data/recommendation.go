@@ -50,8 +50,11 @@ type recommendationListModel struct {
 	AlbumName string
 }
 
-func GetRecommendations(db *gorm.DB, listAll bool) ([]recommendationListModel, error) {
+func GetRecommendations(db *gorm.DB, listAll bool) (model.ListResult[recommendationListModel], error) {
 	recommendations := make([]recommendationListModel, 0)
+
+	var count int
+	db.Raw("SELECT COUNT(id) FROM recommendation").Scan(&count)
 
 	query := db.Table("recommendation R").
 		Select("R.`id`, R.`date`, R.`rated`, A.`name` AS album_name").
@@ -64,5 +67,8 @@ func GetRecommendations(db *gorm.DB, listAll bool) ([]recommendationListModel, e
 
 	query.Find(&recommendations)
 
-	return recommendations, db.Error
+	return model.ListResult[recommendationListModel]{
+		Count:   count,
+		Results: recommendations,
+	}, db.Error
 }

@@ -22,8 +22,17 @@ func listGenres() error {
 		return err
 	}
 
-	for _, genre := range genres {
+	for _, genre := range genres.Results {
 		fmt.Printf("%s: %d\n", genre.Name, genre.Rating)
+	}
+
+	switch {
+	case !listAll && genres.Count > 10:
+		fmt.Printf("Displaying 10/%d genres\n", genres.Count)
+	case !listAll:
+		fmt.Printf("Displaying your top 10 genres\n")
+	case listAll:
+		fmt.Printf("Displaying %d genres\n", genres.Count)
 	}
 
 	return nil

@@ -62,6 +62,11 @@ func addArtist(artistName string) error {
 		return err
 	}
 
+	if searchData.Count <= 0 {
+		fmt.Print("No artists found. Please try again\n")
+		return nil
+	}
+
 	selectedArtistIdx := 0
 	if len(searchData.Artists) > 1 {
 		selectedArtistIdx, err = getUserIdxSelection(searchData.Artists)
