@@ -1,11 +1,11 @@
-package cmd
+package list
 
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var listCmd = &cobra.Command{
+var ListCmd = &cobra.Command{
 	Use:       "list [category]",
 	Short:     "List the items in the given category.",
 	ValidArgs: []string{"artist", "genre", "recommendations"},
@@ -13,11 +13,13 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.PersistentFlags().BoolP("all", "a", false, "List all items")
+	ListCmd.PersistentFlags().BoolP("all", "a", false, "List all items")
 
-	if err := viper.BindPFlag("all", listCmd.PersistentFlags().Lookup("all")); err != nil {
+	if err := viper.BindPFlag("all", ListCmd.PersistentFlags().Lookup("all")); err != nil {
 		panic(err)
 	}
 
-	listCmd.AddCommand(artistCmd)
+	ListCmd.AddCommand(artistCmd)
+	ListCmd.AddCommand(genreCmd)
+	ListCmd.AddCommand(recommendationCmd)
 }

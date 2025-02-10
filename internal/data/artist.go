@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"github.com/wraith29/apollo/internal/config"
 	mb "github.com/wraith29/apollo/internal/data/musicbrainz"
 	"github.com/wraith29/apollo/internal/model"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ func ArtistExists(db *gorm.DB, artistId string) bool {
 }
 
 func SaveMusicBrainzArtist(db *gorm.DB, mbArtist *mb.Artist) error {
-	ignoreWithSecondaryTypes := viper.GetBool("ignore-with-secondary-types")
+	ignoreWithSecondaryTypes := viper.GetBool(config.IgnoreWithSecondaryTypesKey)
 
 	genres := make([]model.Genre, 0)
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/wraith29/apollo/internal/data"
+	"github.com/wraith29/apollo/cmd/list"
 	"github.com/wraith29/apollo/internal/storage"
 )
 
@@ -49,14 +49,10 @@ func init() {
 		panic(err)
 	}
 
-	if err := data.Init(); err != nil {
-		panic(err)
-	}
-
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(recCmd)
 	rootCmd.AddCommand(rateCmd)
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(list.ListCmd)
 }
 
 func Execute() error {

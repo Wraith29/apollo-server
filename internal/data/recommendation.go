@@ -42,3 +42,27 @@ func IsLatestRecommendationRated(db *gorm.DB) (bool, error) {
 
 	return latestRec.Rated, nil
 }
+
+type recommendationListModel struct {
+	Id        uint
+	Date      time.Time
+	Rated     bool
+	AlbumName string
+}
+
+func GetRecommendations(db *gorm.DB, listAll bool) ([]recommendationListModel, error) {
+	recommendations := make([]recommendationListModel, 0)
+
+	query := db.Table("recommendation R").
+		Select("R.`id`, R.`date`, R.`rated`, A.`name` AS album_name").
+		InnerJoins("INNER JOIN album A ON A.`id` = R.`album_id`").
+		Order("R.`id` ASC")
+
+	if !listAll {
+		query.Limit(10)
+	}
+
+	query.Find(&recommendations)
+
+	return recommendations, db.Error
+}

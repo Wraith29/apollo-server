@@ -16,10 +16,10 @@ Add all of your favourite artists, and ones you want to get to know better - and
 - [x] [Add](#add-new-artist)
 - [x] [Recommend](#recommend)
 - [x] [Rate](#rate)
-- [ ] [List](#list)
+- [x] [List](#list)
   - [x] [List Artists](#artists)
-  - [ ] [List Genres](#genres)
-  - [ ] [List Recommendations](#recommendations)
+  - [x] [List Genres](#genres)
+  - [x] [List Recommendations](#recommendations)
 - [ ] [Update](#update)
 
 ### Add new artist
