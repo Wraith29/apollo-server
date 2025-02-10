@@ -99,3 +99,26 @@ func GetArtists(db *gorm.DB, listAll bool) (model.ListResult[model.Artist], erro
 		Results: artists,
 	}, db.Error
 }
+
+func RemoveArtist(db *gorm.DB, artistName string) error {
+	var artistId string
+
+	db.Table("artist").
+		Select("id").
+		Where("name LIKE ?", artistName).
+		Take(&artistId)
+
+	if artistId == "" {
+		return nil
+	}
+
+	db.Table("album").
+		Where("artist_id = ?", artistId).
+		Delete(&model.Album{})
+
+	db.Table("artist").
+		Where("id = ?", artistId).
+		Delete(&model.Artist{})
+
+	return db.Error
+}

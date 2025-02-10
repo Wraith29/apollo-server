@@ -52,6 +52,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(recCmd)
 	rootCmd.AddCommand(rateCmd)
+	rootCmd.AddCommand(removeCmd)
 	rootCmd.AddCommand(list.ListCmd)
 }
 

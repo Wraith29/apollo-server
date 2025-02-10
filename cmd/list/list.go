@@ -8,13 +8,13 @@ import (
 var ListCmd = &cobra.Command{
 	Use:       "list [category]",
 	Short:     "List the items in the given category.",
+	Aliases:   []string{"ls"},
 	ValidArgs: []string{"artist", "genre", "recommendations"},
 	Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 }
 
 func init() {
 	ListCmd.PersistentFlags().BoolP("all", "a", false, "List all items")
-
 	if err := viper.BindPFlag("all", ListCmd.PersistentFlags().Lookup("all")); err != nil {
 		panic(err)
 	}

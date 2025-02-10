@@ -29,7 +29,7 @@ func createRequest(url string) (*http.Request, error) {
 func SearchArtist(artistName string) (*Search, error) {
 	url := fmt.Sprintf(
 		"%s/artist?query=artist:%s&limit=3",
-		baseUrl, url.PathEscape(artistName),
+		baseUrl, url.QueryEscape(artistName),
 	)
 
 	request, err := createRequest(url)
