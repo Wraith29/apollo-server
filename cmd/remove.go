@@ -19,6 +19,7 @@ func removeArtist(artistName string) error {
 
 var removeCmd = &cobra.Command{
 	Use:     "remove",
+	Short:   "Remove the given artist from your library, including removing their albums. (Does not affect genre ratings)",
 	Aliases: []string{"rm"},
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

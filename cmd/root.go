@@ -10,8 +10,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "apollo",
-	Short: "Apollo is a music management and recommendation software",
+	Use:     "apollo",
+	Short:   "Apollo is a music management and recommendation software",
+	Version: "1.0",
 }
 
 func initConfig() error {

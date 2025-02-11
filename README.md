@@ -8,9 +8,6 @@ Add all of your favourite artists, and ones you want to get to know better - and
 > This app is still heavily in development, it is likely there will be breaking changes.
 > Data Structure etc can change, and there is no plan to make each iteration fix any changes
 
-> [!NOTE]
-> Investigate the potential migration from [gorm](https://gorm.io) to [sqlc](https://github.com/sqlc-dev/sqlc) instead
-
 ## Features
 
 - [x] [Add](#add-new-artist)

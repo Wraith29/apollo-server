@@ -23,7 +23,13 @@ func listRecommendations() error {
 	}
 
 	for _, recommendation := range recommendations.Results {
-		fmt.Printf("%d: %s\n", recommendation.Id, recommendation.AlbumName)
+		rating := ""
+
+		if recommendation.Rated {
+			rating = fmt.Sprintf(" (%d)", recommendation.Rating+2)
+		}
+
+		fmt.Printf("%d: %s%s\n", recommendation.Id, recommendation.AlbumName, rating)
 	}
 
 	switch {

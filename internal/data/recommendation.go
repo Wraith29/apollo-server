@@ -47,6 +47,7 @@ type recommendationListModel struct {
 	Id        uint
 	Date      time.Time
 	Rated     bool
+	Rating    int
 	AlbumName string
 }
 
@@ -57,7 +58,7 @@ func GetRecommendations(db *gorm.DB, listAll bool) (model.ListResult[recommendat
 	db.Raw("SELECT COUNT(id) FROM recommendation").Scan(&count)
 
 	query := db.Table("recommendation R").
-		Select("R.`id`, R.`date`, R.`rated`, A.`name` AS album_name").
+		Select("R.`id`, R.`date`, R.`rated`, A.`rating`, A.`name` AS album_name").
 		InnerJoins("INNER JOIN album A ON A.`id` = R.`album_id`").
 		Order("R.`id` DESC")
 
