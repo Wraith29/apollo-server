@@ -1,112 +1,68 @@
 # Apollo
 
-Music Recommendation App.
+A personal music library management tool, in the console.
 
-Add all of your favourite artists, and ones you want to get to know better - and simply run `apollo recommend` to get a random Album to listen to.
+---
 
-> [!CAUTION]
-> This app is still heavily in development, it is likely there will be breaking changes.
-> Data Structure etc can change, and there is no plan to make each iteration fix any changes
+## Overview
 
-## Features
+Apollo is a CLI tool which allows you to manage your favourite artists.
 
-- [x] [Add](#add-new-artist)
-- [x] [Recommend](#recommend)
-- [x] [Rate](#rate)
-- [x] [List](#list)
-  - [x] [List Artists](#artists)
-  - [x] [List Genres](#genres)
-  - [x] [List Recommendations](#recommendations)
-- [ ] [Update](#update)
+### Add an Artist
 
-### Add new artist
-
-Usage:
+Apollo uses [MusicBrainz](https://musicbrainz.org/) behind the scenes.
 
 ```sh
-apollo add <artist_name>
+apollo add "An Artist"
 ```
 
-Add a new artist into your library.
-
-### Recommend
-
-Usage:
-
-```sh
-apollo recommend [genres...] [-l / --listened]
-```
-
-Aliases:
-
-```sh
-apollo rec
-```
-
-Recommend an album from your library.
-
-By default only recommends album's you haven't marked as listened yet, and includes all genres in your library.
-
-Pass the `-l` flag to include albums you've already heard, and pass in up to 3 genre filters to narrow down your recommendations
-
-### Rate
-
-Usage:
-
-```sh
-apollo rate (1 | 2 | 3)`
-```
-
-Rate the most recent recommendation given to you by apollo.
-
-#### Ratings
-
-| Rating | Meaning |
-| ------ | ------- |
-| 1      | I didn't like this album |
-| 2      | This album was ok |
-| 3      | I liked this album |
-
-### List
-
-The following commands will all list 10 of the specified item, unless the `[-a / --all]` flag is provided.
-
-#### Artists
-
-Usage:
-
-```sh
-apollo list artist
-```
-
-#### Genres
-
-Usage:
-
-```sh
-apollo list genres
-```
-
-#### Recommendations
-
-Usage:
-
-```sh
-apollo list recommendations
-```
-
-Or
-
-```sh
-apollo list recs
-```
-
-### Update
-
-This command will go through each of your artists, and check to see if they have released any new albums.
+The `add` command allows you to add the given artist + all of their albums to your library.
 
 > [!NOTE]
-> Need to consider the best way to do this while keeping MusicBrainz rate limit (1 req/s) in mind.
-> May need to try and run this as a background process with some sort of debouncer to prevent hitting the rate limit,
-> without blocking the user for (artist count) seconds
+> If the artist is coming up as someone other than you expect,
+> Try running the command with the `[-i / --interactive]` flag.
+> This will prompt you with the top 3 results from MusicBrainz and you can pick which one matches
 
+### Get an Album Recommendation
+
+```sh
+apollo recommend [genres...]
+```
+
+The `recommend` command will give you a random album (It will prioritise albums you haven't listened to first).
+
+Optionally pass in up to 3 genres to get a filtered recommendation
+
+### Rate an album
+
+Rate your most recent recommendation with this command.
+
+```sh
+apollo rate (1-3)
+```
+
+The `rate` command allows you to rate the most recent recommendation from apollo.
+
+The ratings are as follows:
+
+| Value | Meaning |
+| ----- | ------- |
+| 1     | I didn't like this album |
+| 2     | This album was OK |
+| 3     | I liked this album |
+
+Rating an album will affect the overall rating score for:
+
+- The artist who created the album
+- Any genres associated with the album
+
+## Installation
+
+> [!CAUTION]
+> Apollo is untested on Windows.
+
+The only way to install Apollo currently is through:
+
+```sh
+go install github.com/Wraith29/apollo@latest
+```

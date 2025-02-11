@@ -1,7 +1,15 @@
 package storage
 
-import "errors"
+import (
+	"os"
+	"path"
+)
 
 func GetStorageDir() (string, error) {
-	return "", errors.New("not implemented for windows")
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(userHome, "AppData", "Local", "apollo"), nil
 }
