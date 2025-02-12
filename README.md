@@ -8,6 +8,8 @@ A personal music library management tool, in the console.
 
 Apollo is a CLI tool which allows you to manage your favourite artists.
 
+<sub>There is a lot of code cleanup etc still to be done, but it works :)</sub>
+
 ### Add an Artist
 
 Apollo uses [MusicBrainz](https://musicbrainz.org/) behind the scenes.
