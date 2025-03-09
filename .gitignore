@@ -1,1 +1,5 @@
 apollo
+!apollo/
+
+apollo-server
+!apollo-server/
