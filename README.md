@@ -4,6 +4,21 @@ A personal music library management tool, in the console.
 
 ---
 
+## Installation
+
+Run
+
+```sh
+./scripts/install
+```
+
+Followed by
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl start apollo
+```
+
 ## Overview
 
 Apollo is a CLI tool which allows you to manage your favourite artists.

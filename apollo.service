@@ -2,4 +2,5 @@
 Description=Music Recommendation App
 
 [Service]
-ExecStart=~/.local/share/apollo/apollo-server start
+ExecStart=/usr/sbin/apollo-server start
+
