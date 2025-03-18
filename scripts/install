@@ -1,7 +1,0 @@
-go build ./cmd/apollo
-sudo mv ./apollo /usr/sbin/apollo
-
-go build ./cmd/apollo-server
-sudo mv ./apollo-server /usr/sbin/apollo-server
-
-sudo cp ./apollo.service /usr/lib/systemd/system/apollo.service

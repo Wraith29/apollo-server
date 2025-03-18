@@ -2,29 +2,27 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
-
-	"github.com/wraith29/apollo/pkg/cli"
 )
 
+func ping(w http.ResponseWriter, req *http.Request) {
+	_ = req
+
+	if _, err := w.Write([]byte("Pong!")); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("expected 1 argument but found 0")
-		os.Exit(1)
-	}
+	server := http.NewServeMux()
 
-	cli, err := cli.NewCli(
-		os.Args[1:],
-		cli.NewCommand("start", start),
-	)
+	server.HandleFunc("GET /ping", ping)
 
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	fmt.Printf("Starting server on port 5000\n")
 
-	if err := cli.Run(); err != nil {
-		fmt.Println(err)
+	if err := http.ListenAndServe(":5000", server); err != nil {
+		fmt.Printf("%+v\n", err)
 		os.Exit(1)
 	}
 }

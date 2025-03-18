@@ -1,6 +1,0 @@
-[Unit]
-Description=Music Recommendation App
-
-[Service]
-ExecStart=/usr/sbin/apollo-server start
-
