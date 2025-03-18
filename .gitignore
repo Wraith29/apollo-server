@@ -3,3 +3,5 @@ apollo
 
 apollo-server
 !apollo-server/
+
+db/conf/
