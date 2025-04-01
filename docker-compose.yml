@@ -22,7 +22,7 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - "1301:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - development:/data/apollo-postgres
       - ./db/schema/:/docker-entrypoint-initdb.d/

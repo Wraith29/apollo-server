@@ -4,24 +4,51 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/wraith29/apollo/internal/api"
+	"github.com/wraith29/apollo/internal/data"
+	"github.com/wraith29/apollo/internal/env"
 )
 
-func ping(w http.ResponseWriter, req *http.Request) {
-	_ = req
+type server struct {
+	mux *http.ServeMux
+}
 
-	if _, err := w.Write([]byte("Pong!")); err != nil {
-		panic(err)
+func newServer() server {
+	return server{
+		mux: http.NewServeMux(),
 	}
 }
 
-func main() {
-	server := http.NewServeMux()
+func (s *server) run() error {
+	return http.ListenAndServe(":5000", s.mux)
+}
 
-	server.HandleFunc("GET /ping", ping)
+func (s *server) addRoute(path string, handler http.HandlerFunc) {
+	s.mux.HandleFunc(path, handler)
+}
+
+func (s *server) addAuthenticatedRoute(path string, handler http.HandlerFunc) {
+	s.addRoute(path, api.UserIdMiddleware(handler))
+}
+
+func main() {
+	if err := env.Load(); err != nil {
+		panic(err)
+	}
+
+	if err := data.InitDb(); err != nil {
+		panic(err)
+	}
+
+	server := newServer()
+
+	server.addRoute("POST /init", api.Init)
+	server.addAuthenticatedRoute("POST /artist", api.AddArtist)
 
 	fmt.Printf("Starting server on port 5000\n")
 
-	if err := http.ListenAndServe(":5000", server); err != nil {
+	if err := server.run(); err != nil {
 		fmt.Printf("%+v\n", err)
 		os.Exit(1)
 	}
