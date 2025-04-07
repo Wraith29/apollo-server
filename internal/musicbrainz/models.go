@@ -1,6 +1,8 @@
 package musicbrainz
 
-import "github.com/wraith29/apollo/internal/strutil"
+import (
+	"github.com/wraith29/apollo/internal/strutil"
+)
 
 type PrimaryType string
 
@@ -35,15 +37,16 @@ type Genre struct {
 }
 
 type ReleaseGroup struct {
-	Id             string          `json:"id"`
-	Title          string          `json:"title"`
-	PrimaryType    PrimaryType     `json:"primary-type"`
-	SecondaryTypes []SecondaryType `json:"secondary-types"`
-	Genres         []Genre         `json:"genres"`
+	Id               string          `json:"id"`
+	Title            string          `json:"title"`
+	FirstReleaseDate string          `json:"first-release-date"`
+	PrimaryType      PrimaryType     `json:"primary-type"`
+	SecondaryTypes   []SecondaryType `json:"secondary-types"`
+	Genres           []Genre         `json:"genres"`
 }
 
 func (r *ReleaseGroup) IsValid() bool {
-	return r.PrimaryType == Album && len(r.SecondaryTypes) != 0
+	return r.PrimaryType == Album && len(r.SecondaryTypes) == 0
 }
 
 type Artist struct {
@@ -52,6 +55,28 @@ type Artist struct {
 	Disambiguation string         `json:"disambiguation"`
 	Genres         []Genre        `json:"genres"`
 	ReleaseGroups  []ReleaseGroup `json:"release-groups"`
+}
+
+func (a *Artist) GetUniqueGenres() []Genre {
+	genres := map[Genre]struct{}{}
+
+	for _, genre := range a.Genres {
+		genres[genre] = struct{}{}
+	}
+
+	for _, album := range a.ReleaseGroups {
+		for _, genre := range album.Genres {
+			genres[genre] = struct{}{}
+		}
+	}
+
+	result := make([]Genre, 0)
+
+	for genre := range genres {
+		result = append(result, genre)
+	}
+
+	return result
 }
 
 type SearchResult struct {

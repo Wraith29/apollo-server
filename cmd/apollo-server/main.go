@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/wraith29/apollo/internal/api"
-	"github.com/wraith29/apollo/internal/data"
+	"github.com/wraith29/apollo/internal/db"
 	"github.com/wraith29/apollo/internal/env"
 )
 
@@ -37,7 +37,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := data.InitDb(); err != nil {
+	if err := db.InitDb(); err != nil {
 		panic(err)
 	}
 
@@ -45,6 +45,7 @@ func main() {
 
 	server.addRoute("POST /init", api.Init)
 	server.addAuthenticatedRoute("POST /artist", api.AddArtist)
+	server.addAuthenticatedRoute("GET /recommendation", api.Recommend)
 
 	fmt.Printf("Starting server on port 5000\n")
 

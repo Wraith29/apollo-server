@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/wraith29/apollo/internal/ctx"
-	"github.com/wraith29/apollo/internal/data"
-	mb "github.com/wraith29/apollo/internal/data/musicbrainz"
+	"github.com/wraith29/apollo/internal/db"
+	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
 type addRequest struct {
@@ -20,7 +20,7 @@ func saveArtistWithId(userId, artistId string) error {
 		return err
 	}
 
-	return data.PersistArtistForUser(userId, artistData)
+	return db.Exec(db.SaveArtist(userId, artistData))
 }
 
 func AddArtist(w http.ResponseWriter, req *http.Request) {
@@ -46,6 +46,7 @@ func AddArtist(w http.ResponseWriter, req *http.Request) {
 	artist := mbData.FindArtistWithShortestDistance(body.ArtistName)
 
 	if err := saveArtistWithId(userId, artist.Id); err != nil {
+		println("Artist save failed. Rolling Back")
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -53,8 +54,4 @@ func AddArtist(w http.ResponseWriter, req *http.Request) {
 	println("Committed transaction")
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func AddArtistInteractive(w http.ResponseWriter, req *http.Request) {
-
 }

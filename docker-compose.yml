@@ -1,7 +1,11 @@
 name: "apollo-server"
 
 networks:
-  apollo-server-network:
+  apollo_net:
+    name: "apollo-network"
+  db_net:
+    name: "database-network"
+    external: true
 
 volumes:
   development:
@@ -16,4 +20,18 @@ services:
     ports:
       - "1300:5000"
     networks:
-      - apollo-server-network
+      - apollo_net
+
+  database:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - development:/data/apollo-db
+      - ./sql/:/docker-entrypoint-initdb.d/
+    env_file:
+      - .env
+    networks:
+      - apollo_net
+      - db_net
