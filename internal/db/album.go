@@ -54,7 +54,9 @@ type getAlbumsForUserQuery struct {
 }
 
 type userAlbum struct {
-	ArtistName, AlbumName, AlbumId string
+	ArtistName string `json:"artist_name"`
+	AlbumName  string `json:"album_name"`
+	AlbumId    string `json:"album_id"`
 }
 
 func getUserAlbums(rows *sql.Rows) ([]userAlbum, error) {

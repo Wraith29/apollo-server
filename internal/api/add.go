@@ -46,12 +46,9 @@ func AddArtist(w http.ResponseWriter, req *http.Request) {
 	artist := mbData.FindArtistWithShortestDistance(body.ArtistName)
 
 	if err := saveArtistWithId(userId, artist.Id); err != nil {
-		println("Artist save failed. Rolling Back")
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
-
-	println("Committed transaction")
 
 	w.WriteHeader(http.StatusOK)
 }

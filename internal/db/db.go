@@ -9,6 +9,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const dateFormat = "2006-01-02"
+
 var _conn *sql.DB
 
 func InitDb() error {
