@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 
+	"github.com/lib/pq"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
@@ -50,4 +51,55 @@ type getAlbumsForUserQuery struct {
 	userId          string
 	includeListened bool
 	genres          []string
+}
+
+type userAlbum struct {
+	ArtistName, AlbumName, AlbumId string
+}
+
+func getUserAlbums(rows *sql.Rows) ([]userAlbum, error) {
+	albums := make([]userAlbum, 0)
+
+	var arName, alName, alId string
+
+	for rows.Next() {
+		if err := rows.Scan(&arName, &alName, &alId); err != nil {
+			return nil, err
+		}
+
+		albums = append(albums, userAlbum{arName, alName, alId})
+	}
+
+	return albums, rows.Err()
+}
+
+func getUserAlbumsNoFilter(userId string, includeListened bool) ([]userAlbum, error) {
+	rows, err := _conn.Query(selectAlbumsForUser, userId, includeListened)
+	if err != nil {
+		return nil, err
+	}
+
+	return getUserAlbums(rows)
+}
+
+func getUserAlbumsWithFilter(userId string, includeListened bool, genres []string) ([]userAlbum, error) {
+	rows, err := _conn.Query(
+		selectAlbumsForUserWithGenres,
+		userId,
+		includeListened,
+		pq.Array(genres),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return getUserAlbums(rows)
+}
+
+func GetUserAlbums(userId string, includeListened bool, genres []string) ([]userAlbum, error) {
+	if len(genres) == 0 {
+		return getUserAlbumsNoFilter(userId, includeListened)
+	}
+
+	return getUserAlbumsWithFilter(userId, includeListened, genres)
 }

@@ -37,20 +37,50 @@ const (
 	insertUserArtist = `
 		INSERT INTO "user_artist" ("user_id", "artist_id")
 		VALUES ($1, $2)
+		ON CONFLICT ("user_id", "artist_id") DO NOTHING
 	`
 
 	insertUserAlbum = `
 		INSERT INTO "user_album" ("user_id", "album_id")
 		VALUES ($1, $2)
+		ON CONFLICT ("user_id", "album_id") DO NOTHING
 	`
 
 	insertUserGenre = `
 		INSERT INTO "user_genre" ("user_id", "genre_id")
 		VALUES ($1, $2)
+		ON CONFLICT ("user_id", "genre_id") DO NOTHING
 	`
 
 	insertRecommendation = `
 		INSERT INTO "recommendation" ("user_id", "album_id", "listened_date")
 		VALUES ($1, $2, $3)
+	`
+
+	selectAlbumsForUser = `
+		SELECT
+			AR."name" AS "artist_name",
+			AL."name" AS "album_name",
+			AL."id" AS "album_id"
+		FROM "user_album" UA
+		INNER JOIN "album" AL ON AL."id" = UA."album_id"
+		INNER JOIN "artist" AR ON AR."id" = AL."artist_id"
+		WHERE UA."user_id" = $1
+			AND UA."listened" = $2
+	`
+
+	selectAlbumsForUserWithGenres = `
+		SELECT
+			AR."name" AS "artist_name",
+			AL."name" AS "album_name",
+			AL."id" AS "album_id"
+		FROM "user_album" UA
+		INNER JOIN "album" AL ON AL."id" = UA."album_id"
+		INNER JOIN "artist" AR ON AR."id" = AL."artist_id"
+		INNER JOIN "album_genre" AG ON AG."album_id" = UA."album_id"
+		INNER JOIN "genre" G ON G."id" = AG."genre_id"
+		WHERE UA."user_id" = $1
+			AND UA."listened" = $2
+			AND G."name" = ANY($3)
 	`
 )
