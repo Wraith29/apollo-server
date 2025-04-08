@@ -59,7 +59,7 @@ type userAlbum struct {
 	AlbumId    string `json:"album_id"`
 }
 
-func getUserAlbums(rows *sql.Rows) ([]userAlbum, error) {
+func scanUserAlbums(rows *sql.Rows) ([]userAlbum, error) {
 	albums := make([]userAlbum, 0)
 
 	var arName, alName, alId string
@@ -75,33 +75,52 @@ func getUserAlbums(rows *sql.Rows) ([]userAlbum, error) {
 	return albums, rows.Err()
 }
 
-func getUserAlbumsNoFilter(userId string, includeListened bool) ([]userAlbum, error) {
-	rows, err := _conn.Query(selectAlbumsForUser, userId, includeListened)
+func getUserAlbumsNoFilters(userId string) ([]userAlbum, error) {
+	rows, err := _conn.Query(select_AlbumsForUserNoFilters, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return getUserAlbums(rows)
+	return scanUserAlbums(rows)
 }
 
-func getUserAlbumsWithFilter(userId string, includeListened bool, genres []string) ([]userAlbum, error) {
-	rows, err := _conn.Query(
-		selectAlbumsForUserWithGenres,
-		userId,
-		includeListened,
-		pq.Array(genres),
-	)
+func getUserAlbumsAnyGenreNotRecommended(userId string) ([]userAlbum, error) {
+	rows, err := _conn.Query(select_AlbumsForUserAnyGenreNotRecommended, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return getUserAlbums(rows)
+	return scanUserAlbums(rows)
+}
+
+func getUserAlbumsWithGenres(userId string, genres []string) ([]userAlbum, error) {
+	rows, err := _conn.Query(select_AlbumsForUserWithGenres, userId, pq.Array(genres))
+	if err != nil {
+		return nil, err
+	}
+
+	return scanUserAlbums(rows)
+}
+
+func getUserAlbumsWithGenresNotRecommended(userId string, genres []string) ([]userAlbum, error) {
+	rows, err := _conn.Query(select_AlbumsForUserWithGenresNotRecommended, userId, pq.Array(genres))
+	if err != nil {
+		return nil, err
+	}
+
+	return scanUserAlbums(rows)
 }
 
 func GetUserAlbums(userId string, includeListened bool, genres []string) ([]userAlbum, error) {
-	if len(genres) == 0 {
-		return getUserAlbumsNoFilter(userId, includeListened)
+	switch {
+	case !includeListened && len(genres) == 0:
+		return getUserAlbumsAnyGenreNotRecommended(userId)
+	case includeListened && len(genres) != 0:
+		return getUserAlbumsWithGenres(userId, genres)
+	case !includeListened && len(genres) != 0:
+		return getUserAlbumsWithGenresNotRecommended(userId, genres)
+	default:
+		return getUserAlbumsNoFilters(userId)
 	}
 
-	return getUserAlbumsWithFilter(userId, includeListened, genres)
 }

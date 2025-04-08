@@ -54,8 +54,7 @@ CREATE TABLE public.user_album (
     user_id text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     album_id text NOT NULL REFERENCES "album" ("id") ON DELETE CASCADE,
     rating integer NOT NULL DEFAULT 0,
-    listened boolean NOT NULL DEFAULT false,
-    listened_date date,
+    recommended boolean NOT NULL DEFAULT false,
     notes text,
 
     PRIMARY KEY ("user_id", "album_id")
