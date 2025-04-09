@@ -65,12 +65,6 @@ func SaveAlbumsGenres(albums []mb.ReleaseGroup) dbWriter {
 	return &albumGenresDbWriter{albums}
 }
 
-type userAlbum struct {
-	ArtistName string `json:"artist_name"`
-	AlbumName  string `json:"album_name"`
-	AlbumId    string `json:"album_id"`
-}
-
 func scanUserAlbums(rows *sql.Rows) ([]userAlbum, error) {
 	albums := make([]userAlbum, 0)
 

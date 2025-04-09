@@ -96,3 +96,23 @@ func (r *userAlbumRatingWriter) write(txn *sql.Tx) error {
 func RateAlbum(userId, albumId string, rating int) dbWriter {
 	return &userAlbumRatingWriter{userId, albumId, rating}
 }
+
+func GetUserArtistIds(userId string) ([]string, error) {
+	rows, err := _conn.Query(query.SelectAllArtistsForUser, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var artistId string
+	artistIds := make([]string, 0)
+
+	for rows.Next() {
+		if err := rows.Scan(&artistId); err != nil {
+			return nil, err
+		}
+
+		artistIds = append(artistIds, artistId)
+	}
+
+	return artistIds, rows.Err()
+}

@@ -11,7 +11,8 @@ CREATE TABLE public.genre (
 CREATE TABLE public.artist (
     id text PRIMARY KEY,
     name text NOT NULL,
-    rating integer NOT NULL DEFAULT 0
+    rating integer NOT NULL DEFAULT 0,
+    updated_on date NOT NULL DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE public.artist_genre (
@@ -37,15 +38,15 @@ CREATE TABLE public.album_genre (
 );
 
 CREATE TABLE public.user (
-    id text PRIMARY KEY,
-    name text NOT NULL UNIQUE
+    name text PRIMARY KEY,
+    password text NOT NULL
 );
 
 CREATE TABLE public.user_artist (
     user_id text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     artist_id text NOT NULL REFERENCES "artist" ("id") ON DELETE CASCADE,
     rating integer NOT NULL DEFAULT 0,
-    notes text,
+    added_on date NOT NULL DEFAULT CURRENT_DATE,
 
     PRIMARY KEY ("user_id", "artist_id")
 );
@@ -55,7 +56,8 @@ CREATE TABLE public.user_album (
     album_id text NOT NULL REFERENCES "album" ("id") ON DELETE CASCADE,
     rating integer NOT NULL DEFAULT 0,
     recommended boolean NOT NULL DEFAULT false,
-    notes text,
+    added_on date NOT NULL DEFAULT CURRENT_DATE,
+    updated_on date NOT NULL DEFAULT CURRENT_DATE,
 
     PRIMARY KEY ("user_id", "album_id")
 );
@@ -64,7 +66,7 @@ CREATE TABLE public.user_genre (
     user_id text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     genre_id text NOT NULL REFERENCES "genre" ("id") ON DELETE CASCADE,
     rating integer NOT NULL DEFAULT 0,
-    notes text,
+    added_on date NOT NULL DEFAULT CURRENT_DATE,
 
     PRIMARY KEY ("user_id", "genre_id")
 );
@@ -73,5 +75,5 @@ CREATE TABLE public.recommendation (
     id serial PRIMARY KEY,
     user_id text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     album_id text NOT NULL REFERENCES "album" ("id") ON DELETE CASCADE,
-    listened_date date NOT NULL
+    recommended_date date NOT NULL DEFAULT CURRENT_DATE
 );

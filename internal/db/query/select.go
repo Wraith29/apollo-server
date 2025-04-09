@@ -21,5 +21,6 @@ const (
 	`
 	SelectAlbumsForUserWithGenresNotRecommended = SelectAlbumsForUserWithGenres + ` AND UA."recommended" = false`
 
-	SelectAllArtists = `SELECT id FROM "artist"`
+	SelectAllArtists        = `SELECT id FROM "artist"`
+	SelectAllArtistsForUser = `SELECT "artist_id" FROM "user_artist" WHERE "user_id" = $1`
 )
