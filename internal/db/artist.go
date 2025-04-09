@@ -4,15 +4,16 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/wraith29/apollo/internal/db/query"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
 func saveArtist(txn *sql.Tx, artist *mb.Artist) error {
-	return prepareAndExecute(txn, insertArtist, artist.Id, artist.Name)
+	return prepAndExec(txn, query.InsertArtist, artist.Id, artist.Name)
 }
 
 func saveGenresToArtist(txn *sql.Tx, artist *mb.Artist) error {
-	stmt, err := txn.Prepare(insertArtistGenre)
+	stmt, err := txn.Prepare(query.InsertArtistGenre)
 	if err != nil {
 		return err
 	}
@@ -31,7 +32,7 @@ type addArtistQuery struct {
 	artist *mb.Artist
 }
 
-func (a *addArtistQuery) execute(txn *sql.Tx) error {
+func (a *addArtistQuery) write(txn *sql.Tx) error {
 	allGenres := a.artist.GetUniqueGenres()
 
 	return errors.Join(
@@ -48,6 +49,6 @@ func (a *addArtistQuery) execute(txn *sql.Tx) error {
 	)
 }
 
-func SaveArtist(userId string, artist *mb.Artist) query {
+func SaveArtist(userId string, artist *mb.Artist) dbWriter {
 	return &addArtistQuery{userId, artist}
 }

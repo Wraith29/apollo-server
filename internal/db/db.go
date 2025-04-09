@@ -36,18 +36,18 @@ func getTransaction() (*sql.Tx, error) {
 	return _conn.Begin()
 }
 
-type query interface {
-	execute(*sql.Tx) error
+type dbWriter interface {
+	write(*sql.Tx) error
 }
 
-func Exec(queries ...query) error {
+func Exec(execs ...dbWriter) error {
 	txn, err := getTransaction()
 	if err != nil {
 		return err
 	}
 
-	for _, query := range queries {
-		if err := query.execute(txn); err != nil {
+	for _, query := range execs {
+		if err := query.write(txn); err != nil {
 			return errors.Join(err, txn.Rollback())
 		}
 	}
@@ -55,7 +55,7 @@ func Exec(queries ...query) error {
 	return txn.Commit()
 }
 
-func prepareAndExecute(txn *sql.Tx, query string, args ...any) error {
+func prepAndExec(txn *sql.Tx, query string, args ...any) error {
 	stmt, err := txn.Prepare(query)
 	if err != nil {
 		return err

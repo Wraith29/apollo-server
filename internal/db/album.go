@@ -4,11 +4,12 @@ import (
 	"database/sql"
 
 	"github.com/lib/pq"
+	"github.com/wraith29/apollo/internal/db/query"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
 func saveAlbums(txn *sql.Tx, artistId string, albums []mb.ReleaseGroup) error {
-	stmt, err := txn.Prepare(insertAlbum)
+	stmt, err := txn.Prepare(query.InsertAlbum)
 	if err != nil {
 		return err
 	}
@@ -27,7 +28,7 @@ func saveAlbums(txn *sql.Tx, artistId string, albums []mb.ReleaseGroup) error {
 }
 
 func saveGenresToAlbums(txn *sql.Tx, albums []mb.ReleaseGroup) error {
-	stmt, err := txn.Prepare(insertAlbumGenre)
+	stmt, err := txn.Prepare(query.InsertAlbumGenre)
 	if err != nil {
 		return err
 	}
@@ -45,12 +46,6 @@ func saveGenresToAlbums(txn *sql.Tx, albums []mb.ReleaseGroup) error {
 	}
 
 	return stmt.Close()
-}
-
-type getAlbumsForUserQuery struct {
-	userId          string
-	includeListened bool
-	genres          []string
 }
 
 type userAlbum struct {
@@ -76,7 +71,7 @@ func scanUserAlbums(rows *sql.Rows) ([]userAlbum, error) {
 }
 
 func getUserAlbumsNoFilters(userId string) ([]userAlbum, error) {
-	rows, err := _conn.Query(select_AlbumsForUserNoFilters, userId)
+	rows, err := _conn.Query(query.SelectAlbumsForUserNoFilters, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +80,7 @@ func getUserAlbumsNoFilters(userId string) ([]userAlbum, error) {
 }
 
 func getUserAlbumsAnyGenreNotRecommended(userId string) ([]userAlbum, error) {
-	rows, err := _conn.Query(select_AlbumsForUserAnyGenreNotRecommended, userId)
+	rows, err := _conn.Query(query.SelectAlbumsForUserAnyGenreNotRecommended, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +89,7 @@ func getUserAlbumsAnyGenreNotRecommended(userId string) ([]userAlbum, error) {
 }
 
 func getUserAlbumsWithGenres(userId string, genres []string) ([]userAlbum, error) {
-	rows, err := _conn.Query(select_AlbumsForUserWithGenres, userId, pq.Array(genres))
+	rows, err := _conn.Query(query.SelectAlbumsForUserWithGenres, userId, pq.Array(genres))
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +98,7 @@ func getUserAlbumsWithGenres(userId string, genres []string) ([]userAlbum, error
 }
 
 func getUserAlbumsWithGenresNotRecommended(userId string, genres []string) ([]userAlbum, error) {
-	rows, err := _conn.Query(select_AlbumsForUserWithGenresNotRecommended, userId, pq.Array(genres))
+	rows, err := _conn.Query(query.SelectAlbumsForUserWithGenresNotRecommended, userId, pq.Array(genres))
 	if err != nil {
 		return nil, err
 	}
@@ -123,4 +118,17 @@ func GetUserAlbums(userId string, includeListened bool, genres []string) ([]user
 		return getUserAlbumsNoFilters(userId)
 	}
 
+}
+
+type rateAlbumQuery struct {
+	userId, albumId string
+	rating          int
+}
+
+func (r *rateAlbumQuery) write(txn *sql.Tx) error {
+	return prepAndExec(txn, query.UpdateUserAlbumRating, r.rating, r.userId, r.albumId)
+}
+
+func RateAlbum(userId, albumId string, rating int) dbWriter {
+	return &rateAlbumQuery{userId, albumId, rating}
 }

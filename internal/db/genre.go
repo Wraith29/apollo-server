@@ -3,11 +3,12 @@ package db
 import (
 	"database/sql"
 
+	"github.com/wraith29/apollo/internal/db/query"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
 func saveGenres(txn *sql.Tx, genres []mb.Genre) error {
-	stmt, err := txn.Prepare(insertGenre)
+	stmt, err := txn.Prepare(query.InsertGenre)
 	if err != nil {
 		return err
 	}

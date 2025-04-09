@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 
+	"github.com/wraith29/apollo/internal/db/query"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
@@ -10,7 +11,7 @@ type saveUserQuery struct {
 	userId, username string
 }
 
-func (s *saveUserQuery) execute(txn *sql.Tx) error {
+func (s *saveUserQuery) write(txn *sql.Tx) error {
 	stmt, err := txn.Prepare(`INSERT INTO "user" ("id", "name") VALUES ($1, $2)`)
 	if err != nil {
 		return err
@@ -23,12 +24,12 @@ func (s *saveUserQuery) execute(txn *sql.Tx) error {
 	return stmt.Close()
 }
 
-func SaveUser(userId, username string) query {
+func SaveUser(userId, username string) dbWriter {
 	return &saveUserQuery{userId, username}
 }
 
 func saveAlbumsToUser(txn *sql.Tx, userId string, albums []mb.ReleaseGroup) error {
-	stmt, err := txn.Prepare(insertUserAlbum)
+	stmt, err := txn.Prepare(query.InsertUserAlbum)
 	if err != nil {
 		return err
 	}
@@ -47,11 +48,11 @@ func saveAlbumsToUser(txn *sql.Tx, userId string, albums []mb.ReleaseGroup) erro
 }
 
 func saveArtistToUser(txn *sql.Tx, artist *mb.Artist, userId string) error {
-	return prepareAndExecute(txn, insertUserArtist, userId, artist.Id)
+	return prepAndExec(txn, query.InsertUserArtist, userId, artist.Id)
 }
 
 func saveGenresToUser(txn *sql.Tx, userId string, genres []mb.Genre) error {
-	stmt, err := txn.Prepare(insertUserGenre)
+	stmt, err := txn.Prepare(query.InsertUserGenre)
 	if err != nil {
 		return err
 	}
