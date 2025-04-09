@@ -8,18 +8,23 @@ import (
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
-func saveAlbums(txn *sql.Tx, artistId string, albums []mb.ReleaseGroup) error {
+type albumDbWriter struct {
+	artistId string
+	albums   []mb.ReleaseGroup
+}
+
+func (dw *albumDbWriter) write(txn *sql.Tx) error {
 	stmt, err := txn.Prepare(query.InsertAlbum)
 	if err != nil {
 		return err
 	}
 
-	for _, album := range albums {
+	for _, album := range dw.albums {
 		if !album.IsValid() {
 			continue
 		}
 
-		if _, err := stmt.Exec(album.Id, album.Title, album.FirstReleaseDate, artistId); err != nil {
+		if _, err := stmt.Exec(album.Id, album.Title, album.FirstReleaseDate, dw.artistId); err != nil {
 			return err
 		}
 	}
@@ -27,13 +32,21 @@ func saveAlbums(txn *sql.Tx, artistId string, albums []mb.ReleaseGroup) error {
 	return stmt.Close()
 }
 
-func saveGenresToAlbums(txn *sql.Tx, albums []mb.ReleaseGroup) error {
+func SaveAlbums(artistId string, albums []mb.ReleaseGroup) dbWriter {
+	return &albumDbWriter{artistId, albums}
+}
+
+type albumGenresDbWriter struct {
+	albums []mb.ReleaseGroup
+}
+
+func (dw *albumGenresDbWriter) write(txn *sql.Tx) error {
 	stmt, err := txn.Prepare(query.InsertAlbumGenre)
 	if err != nil {
 		return err
 	}
 
-	for _, album := range albums {
+	for _, album := range dw.albums {
 		if !album.IsValid() {
 			continue
 		}
@@ -46,6 +59,10 @@ func saveGenresToAlbums(txn *sql.Tx, albums []mb.ReleaseGroup) error {
 	}
 
 	return stmt.Close()
+}
+
+func SaveAlbumsGenres(albums []mb.ReleaseGroup) dbWriter {
+	return &albumGenresDbWriter{albums}
 }
 
 type userAlbum struct {
@@ -117,18 +134,4 @@ func GetUserAlbums(userId string, includeListened bool, genres []string) ([]user
 	default:
 		return getUserAlbumsNoFilters(userId)
 	}
-
-}
-
-type rateAlbumQuery struct {
-	userId, albumId string
-	rating          int
-}
-
-func (r *rateAlbumQuery) write(txn *sql.Tx) error {
-	return prepAndExec(txn, query.UpdateUserAlbumRating, r.rating, r.userId, r.albumId)
-}
-
-func RateAlbum(userId, albumId string, rating int) dbWriter {
-	return &rateAlbumQuery{userId, albumId, rating}
 }

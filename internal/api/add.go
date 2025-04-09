@@ -20,7 +20,7 @@ func saveArtistWithId(userId, artistId string) error {
 		return err
 	}
 
-	return db.Exec(db.SaveArtist(userId, artistData))
+	return db.Exec(db.SaveAllArtistData(userId, artistData))
 }
 
 func AddArtist(w http.ResponseWriter, req *http.Request) {

@@ -7,39 +7,35 @@ import (
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
-type saveUserQuery struct {
+type userDbWriter struct {
 	userId, username string
 }
 
-func (s *saveUserQuery) write(txn *sql.Tx) error {
-	stmt, err := txn.Prepare(`INSERT INTO "user" ("id", "name") VALUES ($1, $2)`)
-	if err != nil {
-		return err
-	}
-
-	if _, err := stmt.Exec(s.userId, s.username); err != nil {
-		return err
-	}
-
-	return stmt.Close()
+func (dw *userDbWriter) write(txn *sql.Tx) error {
+	return prepAndExec(txn, query.InsertUser, dw.userId, dw.username)
 }
 
 func SaveUser(userId, username string) dbWriter {
-	return &saveUserQuery{userId, username}
+	return &userDbWriter{userId, username}
 }
 
-func saveAlbumsToUser(txn *sql.Tx, userId string, albums []mb.ReleaseGroup) error {
+type userAlbumDbWriter struct {
+	userId string
+	albums []mb.ReleaseGroup
+}
+
+func (dw *userAlbumDbWriter) write(txn *sql.Tx) error {
 	stmt, err := txn.Prepare(query.InsertUserAlbum)
 	if err != nil {
 		return err
 	}
 
-	for _, album := range albums {
+	for _, album := range dw.albums {
 		if !album.IsValid() {
 			continue
 		}
 
-		if _, err := stmt.Exec(userId, album.Id); err != nil {
+		if _, err := stmt.Exec(dw.userId, album.Id); err != nil {
 			return err
 		}
 	}
@@ -47,21 +43,56 @@ func saveAlbumsToUser(txn *sql.Tx, userId string, albums []mb.ReleaseGroup) erro
 	return stmt.Close()
 }
 
-func saveArtistToUser(txn *sql.Tx, artist *mb.Artist, userId string) error {
-	return prepAndExec(txn, query.InsertUserArtist, userId, artist.Id)
+func SaveAlbumsToUser(userId string, albums []mb.ReleaseGroup) dbWriter {
+	return &userAlbumDbWriter{userId, albums}
 }
 
-func saveGenresToUser(txn *sql.Tx, userId string, genres []mb.Genre) error {
+type userArtistDbWriter struct {
+	userId string
+	artist *mb.Artist
+}
+
+func (dw *userArtistDbWriter) write(txn *sql.Tx) error {
+	return prepAndExec(txn, query.InsertUserArtist, dw.userId, dw.artist.Id)
+}
+
+func SaveArtistToUser(userId string, artist *mb.Artist) dbWriter {
+	return &userArtistDbWriter{userId, artist}
+}
+
+type userGenresDbWriter struct {
+	userId string
+	genres []mb.Genre
+}
+
+func (dw *userGenresDbWriter) write(txn *sql.Tx) error {
 	stmt, err := txn.Prepare(query.InsertUserGenre)
 	if err != nil {
 		return err
 	}
 
-	for _, genre := range genres {
-		if _, err := stmt.Exec(userId, genre.Id); err != nil {
+	for _, genre := range dw.genres {
+		if _, err := stmt.Exec(dw.userId, genre.Id); err != nil {
 			return err
 		}
 	}
 
 	return stmt.Close()
+}
+
+func SaveGenresToUser(userId string, genres []mb.Genre) dbWriter {
+	return &userGenresDbWriter{userId, genres}
+}
+
+type userAlbumRatingWriter struct {
+	userId, albumId string
+	rating          int
+}
+
+func (r *userAlbumRatingWriter) write(txn *sql.Tx) error {
+	return prepAndExec(txn, query.UpdateUserAlbumRating, r.rating, r.userId, r.albumId)
+}
+
+func RateAlbum(userId, albumId string, rating int) dbWriter {
+	return &userAlbumRatingWriter{userId, albumId, rating}
 }
