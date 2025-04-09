@@ -2,10 +2,13 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/lib/pq"
 	"github.com/wraith29/apollo/internal/db/query"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 type albumDbWriter struct {
@@ -118,14 +121,51 @@ func getUserAlbumsWithGenresNotRecommended(userId string, genres []string) ([]us
 }
 
 func GetUserAlbums(userId string, includeListened bool, genres []string) ([]userAlbum, error) {
-	switch {
-	case !includeListened && len(genres) == 0:
-		return getUserAlbumsAnyGenreNotRecommended(userId)
-	case includeListened && len(genres) != 0:
-		return getUserAlbumsWithGenres(userId, genres)
-	case !includeListened && len(genres) != 0:
-		return getUserAlbumsWithGenresNotRecommended(userId, genres)
-	default:
-		return getUserAlbumsNoFilters(userId)
+	qb := sq.StatementBuilder.
+		PlaceholderFormat(sq.Dollar).
+		Select("artist.name", "album.name", "album.id").
+		From("user_album").
+		InnerJoin("album ON album.id = user_album.album_id").
+		InnerJoin("artist ON artist.id = album.artist_id").
+		Where(sq.Eq{"user_album.user_id": userId})
+
+	if len(genres) > 0 {
+		qb = qb.InnerJoin("album_genre ON album_genre.album_id = user_album.album_id").
+			InnerJoin("genre ON genre.id = album_genre.genre_id").
+			// Where("genre.name = ANY($2)", pq.Array(genres))
 	}
+
+	if !includeListened {
+		qb = qb.Where(sq.Eq{"user_album.recommended": false})
+	}
+
+	query, args, err := qb.ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(query)
+
+	for _, arg := range args {
+		fmt.Println(arg)
+	}
+
+	rows, err := _conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return scanUserAlbums(rows)
+
+	// switch {
+	// case !includeListened && len(genres) == 0:
+	// 	return getUserAlbumsAnyGenreNotRecommended(userId)
+	// case includeListened && len(genres) != 0:
+	// 	return getUserAlbumsWithGenres(userId, genres)
+	// case !includeListened && len(genres) != 0:
+	// 	return getUserAlbumsWithGenresNotRecommended(userId, genres)
+	// default:
+	// 	return getUserAlbumsNoFilters(userId)
+	// }
 }

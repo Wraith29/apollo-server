@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand/v2"
 	"net/http"
 	"strings"
@@ -38,6 +39,7 @@ func Recommend(w http.ResponseWriter, req *http.Request) {
 	includeListened := getIncludeListened(req)
 
 	albums, err := db.GetUserAlbums(userId, includeListened, genres)
+	fmt.Printf("Albums: %+v\n", albums)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err)
 		return

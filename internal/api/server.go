@@ -37,9 +37,3 @@ func (s *server) AddAuthenticatedStatefulRoute(path string, handler statefulHand
 		handler(w, req, s)
 	})
 }
-
-// TODO:
-// Figure out how to make HTTP Handlers be methods on the server type
-// ^ Ensure this is optional, only on endpoints that _need_ server information
-// ^ Namely the Update endpoint, as it will have access to the update queue from the server
-// Remove old server implementation

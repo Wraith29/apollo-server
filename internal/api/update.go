@@ -32,10 +32,10 @@ func (u *updateQueue) push(artistId string) {
 func (u *updateQueue) run() {
 	for {
 		select {
-		case artistId := <-u.queue:
-			u.mutex.Lock()
+		// case artistId := <-u.queue:
+		// u.mutex.Lock()
 
-			u.mutex.Unlock()
+		// u.mutex.Unlock()
 		}
 	}
 }
