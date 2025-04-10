@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/wraith29/apollo/internal/ctx"
-	"github.com/wraith29/apollo/internal/db"
 )
 
 type rateRequest struct {
@@ -25,8 +24,8 @@ func Rate(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Printf("%s -> %+v\n", userId, body)
 
-	if err := db.Exec(db.RateAlbum(userId, body.AlbumId, body.Rating)); err != nil {
-		writeError(w, http.StatusInternalServerError, err)
-		return
-	}
+	// if err := db.Exec(db.RateAlbum(userId, body.AlbumId, body.Rating)); err != nil {
+	// 	writeError(w, http.StatusInternalServerError, err)
+	// 	return
+	// }
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/wraith29/apollo/internal/api"
 	"github.com/wraith29/apollo/internal/db"
@@ -28,8 +27,8 @@ func main() {
 
 	fmt.Printf("Starting server on port 5000\n")
 
-	if err := server.Run(); err != nil {
-		fmt.Printf("%+v\n", err)
-		os.Exit(1)
-	}
+	// if err := server.Run(); err != nil {
+	// 	fmt.Printf("%+v\n", err)
+	// 	os.Exit(1)
+	// }
 }

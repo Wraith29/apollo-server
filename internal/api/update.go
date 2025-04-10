@@ -4,9 +4,6 @@ import (
 	"net/http"
 	"sync"
 	"time"
-
-	"github.com/wraith29/apollo/internal/ctx"
-	"github.com/wraith29/apollo/internal/db"
 )
 
 type updateQueue struct {
@@ -41,15 +38,15 @@ func (u *updateQueue) run() {
 }
 
 func Update(w http.ResponseWriter, req *http.Request, s *server) {
-	userId := req.Context().Value(ctx.ContextKeyUserId).(string)
+	// userId := req.Context().Value(ctx.ContextKeyUserId).(string)
 
-	artistIds, err := db.GetUserArtistIds(userId)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, err)
-		return
-	}
+	// artistIds, err := db.GetUserArtistIds(userId)
+	// if err != nil {
+	// writeError(w, http.StatusInternalServerError, err)
+	// return
+	// }
 
-	for _, id := range artistIds {
-		s.queue.push(id)
-	}
+	// for _, id := range artistIds {
+	// s.queue.push(id)
+	// }
 }

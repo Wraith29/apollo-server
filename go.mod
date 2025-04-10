@@ -3,11 +3,13 @@ module github.com/wraith29/apollo
 go 1.23.5
 
 require (
-	github.com/Masterminds/squirrel v1.5.4
 	github.com/lib/pq v1.10.9
+	gorm.io/driver/sqlite v1.5.7
 )
 
 require (
-	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
-	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde // indirect
 )

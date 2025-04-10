@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/wraith29/apollo/internal/db"
 )
 
 type initRequest struct {
@@ -29,12 +27,12 @@ func Init(w http.ResponseWriter, req *http.Request) {
 
 	userId := hex.EncodeToString(hash.Sum(nil))[:8]
 
-	if err := db.Exec(
-		db.SaveUser(userId, body.Username),
-	); err != nil {
-		writeError(w, http.StatusInternalServerError, err)
-		return
-	}
+	// if err := db.Exec(
+	// 	db.SaveUser(userId, body.Username),
+	// ); err != nil {
+	// 	writeError(w, http.StatusInternalServerError, err)
+	// 	return
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write([]byte(userId)); err != nil {

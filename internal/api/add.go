@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/wraith29/apollo/internal/ctx"
-	"github.com/wraith29/apollo/internal/db"
 	mb "github.com/wraith29/apollo/internal/musicbrainz"
 )
 
@@ -15,12 +14,13 @@ type addRequest struct {
 }
 
 func saveArtistWithId(userId, artistId string) error {
-	artistData, err := mb.LookupArtistById(artistId)
-	if err != nil {
-		return err
-	}
+	// artistData, err := mb.LookupArtistById(artistId)
+	// if err != nil {
+	// 	return err
+	// }
 
-	return db.Exec(db.SaveAllArtistData(userId, artistData))
+	// return db.Exec(db.SaveAllArtistData(userId, artistData))
+	return nil
 }
 
 func AddArtist(w http.ResponseWriter, req *http.Request) {

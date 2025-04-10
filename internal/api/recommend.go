@@ -2,14 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand/v2"
 	"net/http"
 	"strings"
-	"time"
-
-	"github.com/wraith29/apollo/internal/ctx"
-	"github.com/wraith29/apollo/internal/db"
 )
 
 func getGenres(req *http.Request) []string {
@@ -33,12 +30,13 @@ func getIncludeListened(req *http.Request) bool {
 }
 
 func Recommend(w http.ResponseWriter, req *http.Request) {
-	userId := req.Context().Value(ctx.ContextKeyUserId).(string)
+	// userId := req.Context().Value(ctx.ContextKeyUserId).(string)
 
-	genres := getGenres(req)
-	includeListened := getIncludeListened(req)
+	// genres := getGenres(req)
+	// includeListened := getIncludeListened(req)
 
-	albums, err := db.GetUserAlbums(userId, includeListened, genres)
+	// albums, err := db.GetUserAlbums(userId, includeListened, genres)
+	albums, err := []struct{}{}, errors.New("")
 	fmt.Printf("Albums: %+v\n", albums)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err)
@@ -55,12 +53,12 @@ func Recommend(w http.ResponseWriter, req *http.Request) {
 		recommendedAlbum = albums[rand.IntN(len(albums)-1)]
 	}
 
-	if err := db.Exec(
-		db.SaveRecommendation(userId, recommendedAlbum.AlbumId, time.Now()),
-	); err != nil {
-		writeError(w, http.StatusInternalServerError, err)
-		return
-	}
+	// if err := db.Exec(
+	// 	db.SaveRecommendation(userId, recommendedAlbum.AlbumId, time.Now()),
+	// ); err != nil {
+	// 	writeError(w, http.StatusInternalServerError, err)
+	// 	return
+	// }
 
 	responseBody, err := json.Marshal(recommendedAlbum)
 	if err != nil {
