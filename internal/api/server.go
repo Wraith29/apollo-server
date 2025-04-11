@@ -29,7 +29,7 @@ func (s *server) AddRoute(path string, handler http.HandlerFunc) {
 }
 
 func (s *server) AddAuthenticatedRoute(path string, handler http.HandlerFunc) {
-	s.AddRoute(path, UserIdMiddleware(handler))
+	s.AddRoute(path, AuthenticationMiddleware(handler))
 }
 
 func (s *server) AddAuthenticatedStatefulRoute(path string, handler statefulHandler) {

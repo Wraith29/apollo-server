@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func GetAlbumRecommendation(w http.ResponseWriter, req *http.Request) {
+func AddArtist(w http.ResponseWriter, req *http.Request) {
 	writeError(w, http.StatusInternalServerError, errors.New("Not Implemented"))
 }
