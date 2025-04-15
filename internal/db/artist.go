@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func SaveArtistToUser(artist *musicbrainz.Artist, userId uint) error {
+func SaveArtistToUser(artist *musicbrainz.Artist, userId string) error {
 	mbGenres := artist.GetUniqueGenres()
 	allGenres := make([]Genre, len(mbGenres))
 
@@ -52,11 +52,12 @@ func SaveArtistToUser(artist *musicbrainz.Artist, userId uint) error {
 		user := User{
 			Id:     userId,
 			Genres: allGenres,
-			Artists: []Artist{Artist{
-				Id:     artist.Id,
-				Name:   artist.Name,
-				Genres: allGenres,
-			}},
+			Artists: []Artist{
+				{
+					Id:     artist.Id,
+					Name:   artist.Name,
+					Genres: allGenres,
+				}},
 			Albums: albums,
 		}
 

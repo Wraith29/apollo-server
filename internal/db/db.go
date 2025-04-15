@@ -13,9 +13,9 @@ const dateFormat = "2006-01-02"
 var conn *gorm.DB
 
 func InitDb() error {
-	username := os.Getenv("POSTGRES_USERNAME")
-	password := os.Getenv("POSTGRES_PASSWORD")
-	dbPort := os.Getenv("DB_PORT")
+	username := os.Getenv("APOLLO_POSTGRES_USERNAME")
+	password := os.Getenv("APOLLO_POSTGRES_PASSWORD")
+	dbPort := os.Getenv("APOLLO_DB_PORT")
 
 	dsn := fmt.Sprintf(
 		"host=localhost user=%s password=%s dbname=apollo sslmode=disable port=%s",

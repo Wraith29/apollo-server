@@ -1,11 +1,13 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/wraith29/apollo/internal/ctx"
 )
 
 var (
@@ -60,5 +62,14 @@ func AuthenticationMiddleware(next http.Handler) http.HandlerFunc {
 			return
 		}
 
+		userId, err := token.Claims.GetSubject()
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err)
+			return
+		}
+
+		userContext := context.WithValue(req.Context(), ctx.ContextKeyUserId, userId)
+
+		next.ServeHTTP(w, req.WithContext(userContext))
 	})
 }

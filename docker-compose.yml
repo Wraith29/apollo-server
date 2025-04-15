@@ -26,12 +26,15 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - "${DB_PORT}:5432"
+      - "${APOLLO_DB_PORT}:5432"
     volumes:
       - development:/data/apollo-db
       - ./sql/:/docker-entrypoint-initdb.d/
     env_file:
       - .env
+    environment:
+      - POSTGRES_USERNAME=${APOLLO_POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${APOLLO_POSTGRES_PASSWORD}
     networks:
       - apollo_net
       - db_net

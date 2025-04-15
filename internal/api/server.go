@@ -6,7 +6,7 @@ import (
 
 type server struct {
 	mux   *http.ServeMux
-	queue updateQueue
+	queue musicBrainzQueue
 }
 
 type statefulHandler func(http.ResponseWriter, *http.Request, *server)
@@ -14,12 +14,12 @@ type statefulHandler func(http.ResponseWriter, *http.Request, *server)
 func NewServer() server {
 	return server{
 		mux:   http.NewServeMux(),
-		queue: newUpdateQueue(),
+		queue: newMusicBrainzQueue(),
 	}
 }
 
 func (s *server) Run() error {
-	go s.queue.run()
+	go s.queue.poll()
 
 	return http.ListenAndServe(":5000", s.mux)
 }

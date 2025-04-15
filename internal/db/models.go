@@ -1,6 +1,10 @@
 package db
 
-import "time"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"time"
+)
 
 type Genre struct {
 	Id     string `gorm:"primaryKey"`
@@ -33,13 +37,39 @@ type Album struct {
 }
 
 type User struct {
-	Id       uint   `gorm:"primaryKey"`
+	Id       string `gorm:"primaryKey"`
 	Username string `gorm:"unique"`
 	Password string
 
 	Genres  []Genre  `gorm:"many2many:user_genres"`
 	Artists []Artist `gorm:"many2many:user_artists"`
 	Albums  []Album  `gorm:"many2many:user_albums"`
+}
+
+func NewUser(username, password string) (User, error) {
+	userId, err := generateUserIdFromUsername(username)
+	if err != nil {
+		return User{}, err
+	}
+
+	user := User{
+		Id:       userId,
+		Username: username,
+		Password: password,
+	}
+
+	return user, nil
+}
+
+func generateUserIdFromUsername(username string) (string, error) {
+	hash := sha256.New()
+	if _, err := hash.Write([]byte(username)); err != nil {
+		return "", err
+	}
+
+	userId := hex.EncodeToString(hash.Sum(nil))[:16]
+
+	return userId, nil
 }
 
 type UserGenre struct {

@@ -20,11 +20,7 @@ func main() {
 
 	server := api.NewServer()
 
-	server.AddRoute("POST /init", api.Init)
-	server.AddAuthenticatedRoute("POST /artist", api.AddArtist)
-	server.AddAuthenticatedRoute("GET /recommendation", api.Recommend)
-	server.AddAuthenticatedRoute("PUT /rate", api.Rate)
-	server.AddAuthenticatedStatefulRoute("POST /update", api.Update)
+	server.AddRoute("POST /auth/register", api.Post_Register)
 
 	fmt.Printf("Starting server on port 5000\n")
 
