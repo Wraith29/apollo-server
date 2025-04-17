@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -24,7 +26,7 @@ func parseAuthToken(header string) (*jwt.Token, error) {
 		}
 
 		//TODO: Replace this with an actual secret key
-		return []byte("SecretKey"), nil
+		return []byte(os.Getenv("APOLLO_SECRET_KEY")), nil
 	})
 
 	if err != nil {
@@ -47,14 +49,15 @@ func parseAuthToken(header string) (*jwt.Token, error) {
 
 func AuthenticationMiddleware(next http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		authHeader := req.Header.Get("Authentication")
+		authHeader := req.Header.Get("Authorization")
 		if authHeader == "" {
-			w.WriteHeader(http.StatusUnauthorized)
+			writeError(w, http.StatusUnauthorized, errors.New("missing authorization header"))
 			return
 		}
 
 		token, err := parseAuthToken(authHeader)
 		if err != nil && (errors.Is(err, invalidToken) || errors.Is(err, expiredToken)) {
+			fmt.Printf("%+v\n", err)
 			writeError(w, http.StatusUnauthorized, err)
 			return
 		} else if err != nil {

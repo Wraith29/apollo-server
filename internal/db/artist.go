@@ -1,68 +1,51 @@
 package db
 
 import (
-	"time"
-
 	"github.com/wraith29/apollo/internal/musicbrainz"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-func SaveArtistToUser(artist *musicbrainz.Artist, userId string) error {
-	mbGenres := artist.GetUniqueGenres()
-	allGenres := make([]Genre, len(mbGenres))
+func SaveArtist(artist *musicbrainz.Artist) error {
+	allGenres := artist.GetUniqueGenres()
 
-	for idx, genre := range mbGenres {
-		allGenres[idx] = Genre{Id: genre.Id, Name: genre.Name}
+	return conn.Transaction(func(txn *gorm.DB) error {
+		if err := SaveGenres(txn, GenresFromMusicBrainzGenres(allGenres)); err != nil {
+			return err
+		}
+
+		artistData, err := ArtistFromMusicBrainzArtist(artist)
+		if err != nil {
+			return err
+		}
+
+		if err := txn.Clauses(clause.OnConflict{UpdateAll: true}).Create(&artistData).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func AddArtistToUser(artist *musicbrainz.Artist, userId string) error {
+	artistData, err := ArtistFromMusicBrainzArtist(artist)
+	if err != nil {
+		return err
 	}
 
-	conn.Transaction(func(txn *gorm.DB) error {
-		txn = txn.Clauses(clause.OnConflict{DoNothing: true})
+	allGenres := artist.GetUniqueGenres()
 
-		albums := make([]Album, 0)
-
-		for _, album := range artist.ReleaseGroups {
-			if !album.IsValid() {
-				continue
-			}
-
-			releaseDate, err := time.Parse(dateFormat, album.FirstReleaseDate)
-			if err != nil {
-				return err
-			}
-
-			albumGenres := make([]Genre, 0)
-			for _, genre := range album.Genres {
-				albumGenres = append(albumGenres, Genre{
-					Id:   genre.Id,
-					Name: genre.Name,
-				})
-			}
-
-			albums = append(albums, Album{
-				Id:          album.Id,
-				Name:        album.Title,
-				Rating:      0,
-				ReleaseDate: releaseDate,
-				ArtistId:    artist.Id,
-				Genres:      albumGenres,
-			})
+	return conn.Transaction(func(txn *gorm.DB) error {
+		if err := AddGenresToUser(txn, GenresFromMusicBrainzGenres(allGenres), userId); err != nil {
+			return err
 		}
 
-		user := User{
-			Id:     userId,
-			Genres: allGenres,
-			Artists: []Artist{
-				{
-					Id:     artist.Id,
-					Name:   artist.Name,
-					Genres: allGenres,
-				}},
-			Albums: albums,
+		if err := AddAlbumsToUser(txn, artistData.Albums, userId); err != nil {
+			return err
 		}
 
-		return txn.Create(&user).Error
+		userArtist := UserArtist{UserId: userId, ArtistId: artist.Id}
+
+		return txn.Clauses(clause.OnConflict{DoNothing: true}).Create(&userArtist).Error
 	})
-
-	return nil
 }

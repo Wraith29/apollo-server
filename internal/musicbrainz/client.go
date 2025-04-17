@@ -1,11 +1,15 @@
 package musicbrainz
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"time"
+
+	"golang.org/x/time/rate"
 )
 
 const (
@@ -25,7 +29,21 @@ func createRequest(endpoint string) (*http.Request, error) {
 	return request, nil
 }
 
-func SearchArtistByName(artistName string) (*SearchResult, error) {
+type Client struct {
+	limiter rate.Limiter
+}
+
+func NewClient() Client {
+	return Client{
+		limiter: *rate.NewLimiter(rate.Every(time.Second), 1),
+	}
+}
+
+func (c *Client) SearchArtistByName(artistName string) (*SearchResult, error) {
+	if !c.limiter.Allow() {
+		c.limiter.Wait(context.Background())
+	}
+
 	endpoint := fmt.Sprintf(
 		"%s/artist?query=artist:%s&limit=3",
 		baseUrl, url.QueryEscape(artistName),
@@ -58,7 +76,11 @@ func SearchArtistByName(artistName string) (*SearchResult, error) {
 	return &result, err
 }
 
-func LookupArtistById(artistMbid string) (*Artist, error) {
+func (c *Client) LookupArtistById(artistMbid string) (*Artist, error) {
+	if !c.limiter.Allow() {
+		c.limiter.Wait(context.Background())
+	}
+
 	endpoint := fmt.Sprintf(
 		"%s/artist/%s?inc=release-groups+genres",
 		baseUrl, artistMbid,

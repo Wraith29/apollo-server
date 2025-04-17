@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"time"
+
+	"github.com/wraith29/apollo/internal/musicbrainz"
 )
 
 type Genre struct {
@@ -15,13 +17,49 @@ type Genre struct {
 	Albums  []Album  `gorm:"many2many:album_genres"`
 }
 
+func GenresFromMusicBrainzGenres(genres []musicbrainz.Genre) []Genre {
+	result := make([]Genre, len(genres))
+
+	for idx, genre := range genres {
+		result[idx] = Genre{Id: genre.Id, Name: genre.Name}
+	}
+
+	return result
+}
+
 type Artist struct {
 	Id        string `gorm:"primaryKey"`
 	Name      string
 	Rating    int `gorm:"default:0"`
 	UpdatedAt time.Time
 
+	Albums []Album
 	Genres []Genre `gorm:"many2many:artist_genres"`
+}
+
+func ArtistFromMusicBrainzArtist(artist *musicbrainz.Artist) (Artist, error) {
+	albums := make([]Album, 0)
+
+	for _, releaseGroup := range artist.ReleaseGroups {
+		if !releaseGroup.IsValid() {
+			continue
+		}
+
+		album, err := AlbumFromMusicBrainzReleaseGroup(releaseGroup, artist.Id)
+		if err != nil {
+			return Artist{}, err
+		}
+
+		albums = append(albums, album)
+	}
+
+	return Artist{
+		Id:        artist.Id,
+		Name:      artist.Name,
+		UpdatedAt: time.Now(),
+		Albums:    albums,
+		Genres:    GenresFromMusicBrainzGenres(artist.Genres),
+	}, nil
 }
 
 type Album struct {
@@ -34,6 +72,21 @@ type Album struct {
 	Artist   Artist
 
 	Genres []Genre `gorm:"many2many:album_genres"`
+}
+
+func AlbumFromMusicBrainzReleaseGroup(rg musicbrainz.ReleaseGroup, artistId string) (Album, error) {
+	releaseDate, err := time.Parse(dateFormat, rg.FirstReleaseDate)
+	if err != nil {
+		return Album{}, err
+	}
+
+	return Album{
+		Id:          rg.Id,
+		Name:        rg.Title,
+		ReleaseDate: releaseDate,
+		ArtistId:    artistId,
+		Genres:      GenresFromMusicBrainzGenres(rg.Genres),
+	}, nil
 }
 
 type User struct {
@@ -73,14 +126,14 @@ func generateUserIdFromUsername(username string) (string, error) {
 }
 
 type UserGenre struct {
-	UserId    uint   `gorm:"primaryKey"`
+	UserId    string `gorm:"primaryKey"`
 	GenreId   string `gorm:"primaryKey"`
 	Rating    int    `gorm:"default:0"`
 	CreatedAt time.Time
 }
 
 type UserArtist struct {
-	UserId    uint   `gorm:"primaryKey"`
+	UserId    string `gorm:"primaryKey"`
 	ArtistId  string `gorm:"primaryKey"`
 	Rating    int    `gorm:"default:0"`
 	CreatedAt time.Time
@@ -88,7 +141,7 @@ type UserArtist struct {
 }
 
 type UserAlbum struct {
-	UserId      uint   `gorm:"primaryKey"`
+	UserId      string `gorm:"primaryKey"`
 	AlbumId     string `gorm:"primaryKey"`
 	Rating      int    `gorm:"default:0"`
 	Recommended bool   `gorm:"default:false"`
