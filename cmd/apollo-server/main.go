@@ -26,6 +26,9 @@ func main() {
 	server.AddAuthenticatedStatefulRoute("POST /artist", api.Post_Artist)
 	server.AddAuthenticatedStatefulRoute("POST /artist/update", api.Post_Update)
 
+	server.AddAuthenticatedRoute("GET /album/recommendation", api.Get_Recommendation)
+	server.AddAuthenticatedRoute("PUT /album/rating", api.Put_Rating)
+
 	fmt.Printf("Starting server on port 5000\n")
 
 	if err := server.Run(); err != nil {

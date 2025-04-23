@@ -151,9 +151,9 @@ type UserAlbum struct {
 
 type Recommendation struct {
 	Id        uint `gorm:"primaryKey"`
-	UserId    uint
+	UserId    string
 	User      User
-	GenreId   string
-	Genre     Genre
+	AlbumId   string
+	Album     Album
 	CreatedAt time.Time
 }

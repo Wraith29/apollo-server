@@ -2,8 +2,13 @@ import std/[httpclient, json]
 
 const baseUrl = "http://localhost:5000/"
 
-type AuthBody = ref object
-  authToken: string
+type
+  AuthBody = ref object
+    authToken: string
+
+  RatingBody = ref object
+    albumId: string
+    rating: int
 
 proc getAuthToken(client: HttpClient): string =
   const url = baseUrl & "auth/login"
@@ -24,17 +29,22 @@ proc sendAddArtistRequest(client: HttpClient; artistName, authToken: string): vo
 
 proc main(): void =
   let client = newHttpClient()
-  let authResponse = getAuthToken(client)
+  let authToken = getAuthToken(client)
 
-  for artist in @[
-      "Muse", "You me at 6", "Royal Blood", "The Amazons",
-      "Polaris", "The 1975", "Architects", "Spiritbox",
-      "Bad Omens", "Boston Manor", "Bring me the Horizon",
-      "The Clause", "The Sheratons", "Dead Pony", "Lewis Capaldi",
-      "My Chemical Romance", "Paramore", "Pierce the Veil",
-      "Sam Fender", "Sea Girls"
-  ]:
-    sendAddArtistRequest(client, artist, authResponse)
+  client.headers.add("Authorization", authToken)
+
+  let albumRecommendation = client.get(baseUrl & "album/recommendation")
+
+  echo albumRecommendation.body()
+  
+  let response = json.parseJson(albumRecommendation.body())
+
+  let albumId = response["AlbumId"]
+
+  let res = client.putContent(baseUrl & "album/rating", $(%*{"albumId": albumId, "rating": 5}))
+
+  echo res
+  
 
 when isMainModule:
   main()

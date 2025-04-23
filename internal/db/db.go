@@ -81,3 +81,13 @@ func migrateModels() error {
 
 	return nil
 }
+
+func Collect[TIn, TOut any](collection []TIn, selector func(TIn) TOut) []TOut {
+	result := make([]TOut, len(collection))
+
+	for idx, value := range collection {
+		result[idx] = selector(value)
+	}
+
+	return result
+}

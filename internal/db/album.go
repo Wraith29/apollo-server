@@ -18,3 +18,52 @@ func AddAlbumsToUser(txn *gorm.DB, albums []Album, userId string) error {
 
 	return txn.Clauses(clause.OnConflict{UpdateAll: true}).Create(&userAlbums).Error
 }
+
+func UpdateUserAlbumRating(txn *gorm.DB, userId, albumId string, rating int) error {
+	userAlbum := UserAlbum{UserId: userId, AlbumId: albumId}
+
+	return txn.
+		Model(&userAlbum).
+		Update("rating", rating).Error
+}
+
+func UpdateGlobalAlbumRating(txn *gorm.DB, albumId string, rating int) error {
+	var album Album
+
+	if err := txn.First(&album).Where("id = ?", albumId).Error; err != nil {
+		return err
+	}
+
+	album.Rating += rating
+
+	return txn.Save(&album).Error
+}
+
+type RecommendedAlbum struct {
+	AlbumId, AlbumName, ArtistName string
+}
+
+func GetUserAlbums(userId string, genres []string, includeRecommended bool) ([]RecommendedAlbum, error) {
+	query := conn.Table("user_albums").
+		Select("albums.id AS album_id, albums.name AS album_name, artists.name AS artist_name").
+		Joins("INNER JOIN albums ON albums.id = user_albums.album_id").
+		Joins("INNER JOIN artists ON artists.id = albums.artist_id").
+		Where("user_albums.user_id = ?", userId)
+
+	if !includeRecommended {
+		query = query.Where("user_albums.recommended = false")
+	}
+
+	if len(genres) != 0 {
+		query = query.
+			Joins("INNER JOIN album_genres ON album_genres.album_id = albums.id").
+			Joins("INNER JOIN genres ON genres.id = album_genres.genre_id").
+			Where("genres.name IN ?", genres)
+	}
+
+	var albums []RecommendedAlbum
+
+	err := query.Find(&albums).Error
+
+	return albums, err
+}

@@ -49,3 +49,23 @@ func AddArtistToUser(artist *musicbrainz.Artist, userId string) error {
 		return txn.Clauses(clause.OnConflict{DoNothing: true}).Create(&userArtist).Error
 	})
 }
+
+func UpdateUserArtistRating(txn *gorm.DB, userId, ArtistId string, rating int) error {
+	userArtist := UserArtist{UserId: userId, ArtistId: ArtistId}
+
+	return txn.
+		Model(&userArtist).
+		Update("rating", rating).Error
+}
+
+func UpdateGlobalArtistRating(txn *gorm.DB, artistId string, rating int) error {
+	var artist Artist
+
+	if err := txn.First(&artist).Where("id = ?", artistId).Error; err != nil {
+		return err
+	}
+
+	artist.Rating += rating
+
+	return txn.Save(&artist).Error
+}

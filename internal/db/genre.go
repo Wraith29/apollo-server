@@ -18,3 +18,25 @@ func AddGenresToUser(txn *gorm.DB, genres []Genre, userId string) error {
 
 	return txn.Clauses(clause.OnConflict{DoNothing: true}).Create(&userGenres).Error
 }
+
+func UpdateUserGenreRatings(txn *gorm.DB, userId string, genreIds []string, rating int) error {
+	return txn.
+		Model(&UserGenre{}).
+		Where("user_id = ?", userId).
+		Where("genre_id IN ?", genreIds).
+		Update("rating", rating).Error
+}
+
+func UpdateGlobalGenreRatings(txn *gorm.DB, genreIds []string, rating int) error {
+	var genres []Genre
+
+	if err := txn.Find(&genres).Where("id = ?", genreIds).Error; err != nil {
+		return err
+	}
+
+	for _, genre := range genres {
+		genre.Rating += rating
+	}
+
+	return txn.Save(&genres).Error
+}
