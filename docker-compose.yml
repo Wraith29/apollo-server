@@ -1,0 +1,40 @@
+name: "apollo-server"
+
+networks:
+  apollo_net:
+    name: "apollo-network"
+  db_net:
+    name: "database-network"
+    external: true
+
+volumes:
+  development:
+    driver: local
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - "1300:5000"
+    networks:
+      - apollo_net
+
+  database:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "${APOLLO_DB_PORT}:5432"
+    volumes:
+      - development:/data/apollo-db
+      - ./sql/:/docker-entrypoint-initdb.d/
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USERNAME=${APOLLO_POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${APOLLO_POSTGRES_PASSWORD}
+    networks:
+      - apollo_net
+      - db_net

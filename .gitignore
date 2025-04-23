@@ -1,1 +1,9 @@
 apollo
+!apollo/
+
+apollo-server
+!apollo-server/
+
+db/conf/
+
+.env
