@@ -17,6 +17,10 @@ func loadFile(filename string) error {
 	}
 
 	for _, line := range strings.Split(strings.Trim(string(contents), "\n"), "\n") {
+		if line == "" {
+			continue
+		}
+
 		if err := loadLine(strings.Trim(line, "\n")); err != nil {
 			return err
 		}
