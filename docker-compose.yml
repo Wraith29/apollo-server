@@ -9,7 +9,7 @@ networks:
 
 volumes:
   development:
-    driver: local
+    external: true
 
 services:
   api:

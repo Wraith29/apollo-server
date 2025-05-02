@@ -48,7 +48,7 @@ func Get_Recommendation(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if len(albums) == 0 {
-		writeError(w, http.StatusNoContent, errors.New("no albums found"))
+		writeError(w, http.StatusBadRequest, errors.New("no albums found"))
 		return
 	}
 
@@ -64,6 +64,8 @@ func Get_Recommendation(w http.ResponseWriter, req *http.Request) {
 		writeError(w, http.StatusInternalServerError, errors.New("failed to load response"))
 		return
 	}
+
+	println(bytes)
 
 	if _, err := w.Write(bytes); err != nil {
 		fmt.Printf("Error writing response: %+v\n", err)
