@@ -17,6 +17,9 @@ services:
       context: .
       dockerfile: ./Dockerfile
     restart: always
+    depends_on:
+      database:
+        condition: service_healthy
     ports:
       - "1300:5000"
     networks:
@@ -26,7 +29,7 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - "${APOLLO_DB_PORT}:5432"
+      - "${APOLLO_DB_HOST_PORT}:5432"
     volumes:
       - development:/data/apollo-db
       - ./sql/:/docker-entrypoint-initdb.d/
@@ -35,6 +38,11 @@ services:
     environment:
       - POSTGRES_USERNAME=${APOLLO_POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${APOLLO_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
     networks:
       - apollo_net
       - db_net

@@ -76,3 +76,11 @@ func AuthenticationMiddleware(next http.Handler) http.HandlerFunc {
 		next.ServeHTTP(w, req.WithContext(userContext))
 	})
 }
+
+func LoggingMiddleware(next http.Handler) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		fmt.Printf("%s %s\n", req.Method, req.URL.Path)
+
+		next.ServeHTTP(w, req)
+	})
+}

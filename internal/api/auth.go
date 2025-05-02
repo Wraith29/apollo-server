@@ -131,14 +131,15 @@ func createAuthToken(userId string) (string, error) {
 }
 
 func writeAuthResponse(w http.ResponseWriter, authToken string) error {
-	response, err := json.Marshal(authResponse{authToken})
+	response := authResponse{AuthToken: authToken}
+	body, err := json.Marshal(&response)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err)
 		return nil
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	if _, err := w.Write(response); err != nil {
+	if _, err := w.Write(body); err != nil {
 		return err
 	}
 

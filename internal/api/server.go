@@ -25,7 +25,7 @@ func (s *server) Run() error {
 }
 
 func (s *server) AddRoute(path string, handler http.HandlerFunc) {
-	s.mux.HandleFunc(path, handler)
+	s.mux.HandleFunc(path, LoggingMiddleware(handler))
 }
 
 func (s *server) AddAuthenticatedRoute(path string, handler http.HandlerFunc) {

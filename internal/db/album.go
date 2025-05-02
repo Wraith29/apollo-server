@@ -40,7 +40,9 @@ func UpdateGlobalAlbumRating(txn *gorm.DB, albumId string, rating int) error {
 }
 
 type RecommendedAlbum struct {
-	AlbumId, AlbumName, ArtistName string
+	AlbumId    string `json:"albumId"`
+	AlbumName  string `json:"albumName"`
+	ArtistName string `json:"artistName"`
 }
 
 func GetUserAlbums(userId string, genres []string, includeRecommended bool) ([]RecommendedAlbum, error) {

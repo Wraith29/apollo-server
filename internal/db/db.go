@@ -15,14 +15,18 @@ var conn *gorm.DB
 func InitDb() error {
 	username := os.Getenv("APOLLO_POSTGRES_USERNAME")
 	password := os.Getenv("APOLLO_POSTGRES_PASSWORD")
-	dbPort := os.Getenv("APOLLO_DB_PORT")
+	host := os.Getenv("APOLLO_DB_HOST")
+	port := os.Getenv("APOLLO_DB_CONN_PORT")
 
 	dsn := fmt.Sprintf(
-		"host=localhost user=%s password=%s dbname=apollo sslmode=disable port=%s",
+		"postgres://%s:%s@%s:%s/apollo?sslmode=disable",
 		username,
 		password,
-		dbPort,
+		host,
+		port,
 	)
+
+	println("Connection String:", dsn)
 
 	db, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
