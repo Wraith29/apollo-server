@@ -17,3 +17,8 @@
   - [ ] Albums
   - [ ] Genres
   - [ ] Recommendations
+
+## Testing
+
+- [ ] General unit tests
+- [ ] Api testing
