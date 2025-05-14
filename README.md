@@ -17,8 +17,8 @@ At the time of writing both of these implements are still WIP. The CLI is mostly
 
 The workflow of someone wanting to use this purely from the API would be:
 
-> Register a user `POST <apollo-url>/auth/register` (This will return an auth token)
-> Add artist(s) `POST <apollo-url>/artist`
+ - 1) Register a user `POST <apollo-url>/auth/register` (This will return an auth token)
+ - 2) Add artist(s) `POST <apollo-url>/artist`
 
 ```json
 {
@@ -26,8 +26,8 @@ The workflow of someone wanting to use this purely from the API would be:
 }
 ```
 
-> Get a recommendation `GET <apollo-url>/album/recommendation`
-> Rate that recommendation `PUT <apollo-url>/album/rating`
+ - 3) Get a recommendation `GET <apollo-url>/album/recommendation`
+ - 4) Rate that recommendation `PUT <apollo-url>/album/rating`
 
 ```json
 {
