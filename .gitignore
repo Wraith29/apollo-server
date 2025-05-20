@@ -4,6 +4,6 @@ apollo
 apollo-server
 !apollo-server/
 
-db/conf/
-
 .env
+.env.docker
+.helix

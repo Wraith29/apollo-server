@@ -26,8 +26,6 @@ func InitDb() error {
 		port,
 	)
 
-	println("Connection String:", dsn)
-
 	db, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
 		return err

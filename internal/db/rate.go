@@ -1,13 +1,13 @@
 package db
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
 // Rating has already been changed to be the correct scale
 func RateAlbumForUser(userId, albumId string, rating int) error {
-	_ = userId
-
 	var album Album
 
 	if err := conn.
@@ -19,6 +19,8 @@ func RateAlbumForUser(userId, albumId string, rating int) error {
 		Error; err != nil {
 		return err
 	}
+
+	fmt.Printf("%s\n", album)
 
 	genreIds := Collect(album.Genres, func(g Genre) string { return g.Id })
 

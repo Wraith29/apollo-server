@@ -10,8 +10,10 @@ import (
 )
 
 func main() {
-	if err := env.Load(); err != nil {
-		panic(err)
+	if os.Getenv("APOLLO_ENV") != "prod" {
+		if err := env.Load(); err != nil {
+			panic(err)
+		}
 	}
 
 	if err := db.InitDb(); err != nil {

@@ -20,6 +20,11 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    environment:
+      - APOLLO_ENV="prod"
+    env_file:
+      - .env
+      - .env.docker
     ports:
       - "1300:5000"
     networks:
