@@ -19,24 +19,42 @@ func AddGenresToUser(txn *gorm.DB, genres []Genre, userId string) error {
 	return txn.Clauses(clause.OnConflict{DoNothing: true}).Create(&userGenres).Error
 }
 
-func UpdateUserGenreRatings(txn *gorm.DB, userId string, genreIds []string, rating int) error {
-	return txn.
-		Model(&UserGenre{}).
-		Where("user_id = ?", userId).
-		Where("genre_id IN ?", genreIds).
-		Update("rating", rating).Error
-}
+func UpdateUserGenreRatings(txn *gorm.DB, userId string) error {
+	type result struct {
+		AlbumId string
+		Rating  int
+		GenreId string
+	}
 
-func UpdateGlobalGenreRatings(txn *gorm.DB, genreIds []string, rating int) error {
-	var genres []Genre
+	var results []result
 
-	if err := txn.Find(&genres).Where("id = ?", genreIds).Error; err != nil {
+	if err := txn.
+		Table("albums").
+		Joins("INNER JOIN user_albums ON user_albums.album_id = albums.id").
+		Joins("INNER JOIN album_genres ON album_genres.album_id = albums.id").
+		Where("user_albums.user_id = ?", userId).
+		Scan(&results).
+		Error; err != nil {
 		return err
 	}
 
-	for _, genre := range genres {
-		genre.Rating += rating
+	genreRatings := make(map[string]int)
+
+	for _, result := range results {
+		current := genreRatings[result.GenreId]
+		genreRatings[result.GenreId] = current + result.Rating
 	}
 
-	return txn.Save(&genres).Error
+	for genreId, rating := range genreRatings {
+		if err := txn.
+			Table("user_genres").
+			Where("user_id = ?", userId).
+			Where("genre_id = ?", genreId).
+			Update("rating", rating).
+			Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

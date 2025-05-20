@@ -24,19 +24,8 @@ func UpdateUserAlbumRating(txn *gorm.DB, userId, albumId string, rating int) err
 
 	return txn.
 		Model(&userAlbum).
-		Update("rating", rating).Error
-}
-
-func UpdateGlobalAlbumRating(txn *gorm.DB, albumId string, rating int) error {
-	var album Album
-
-	if err := txn.First(&album).Where("id = ?", albumId).Error; err != nil {
-		return err
-	}
-
-	album.Rating += rating
-
-	return txn.Save(&album).Error
+		Update("rating", rating).
+		Error
 }
 
 type RecommendedAlbum struct {

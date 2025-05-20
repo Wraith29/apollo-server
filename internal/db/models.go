@@ -9,9 +9,8 @@ import (
 )
 
 type Genre struct {
-	Id     string `gorm:"primaryKey"`
-	Name   string
-	Rating int `gorm:"default:0"`
+	Id   string `gorm:"primaryKey"`
+	Name string
 
 	Artists []Artist `gorm:"many2many:artist_genres"`
 	Albums  []Album  `gorm:"many2many:album_genres"`
@@ -30,7 +29,6 @@ func GenresFromMusicBrainzGenres(genres []musicbrainz.Genre) []Genre {
 type Artist struct {
 	Id        string `gorm:"primaryKey"`
 	Name      string
-	Rating    int `gorm:"default:0"`
 	UpdatedAt time.Time
 
 	Albums []Album
@@ -65,7 +63,6 @@ func ArtistFromMusicBrainzArtist(artist *musicbrainz.Artist) (Artist, error) {
 type Album struct {
 	Id          string `gorm:"primaryKey"`
 	Name        string
-	Rating      int `gorm:"default:0"`
 	ReleaseDate time.Time
 
 	ArtistId string

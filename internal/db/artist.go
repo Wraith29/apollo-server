@@ -50,22 +50,28 @@ func AddArtistToUser(artist *musicbrainz.Artist, userId string) error {
 	})
 }
 
-func UpdateUserArtistRating(txn *gorm.DB, userId, ArtistId string, rating int) error {
-	userArtist := UserArtist{UserId: userId, ArtistId: ArtistId}
+// Calculates the User Artist rating based on the artists albums
+func UpdateUserArtistRating(txn *gorm.DB, userId, artistId string) error {
+	var albums []UserAlbum
 
-	return txn.
-		Model(&userArtist).
-		Update("rating", rating).Error
-}
-
-func UpdateGlobalArtistRating(txn *gorm.DB, artistId string, rating int) error {
-	var artist Artist
-
-	if err := txn.First(&artist).Where("id = ?", artistId).Error; err != nil {
+	if err := txn.
+		Table("user_albums").
+		Where("user_id = ?", userId).
+		Joins("INNER JOIN albums ON albums.id = user_albums.album_id").
+		Where("albums.artist_id = ?", artistId).
+		Find(&albums).
+		Error; err != nil {
 		return err
 	}
 
-	artist.Rating += rating
+	rating := 0
+	for _, album := range albums {
+		rating += album.Rating
+	}
 
-	return txn.Save(&artist).Error
+	return txn.
+		Table("user_artists").
+		Where("user_id = ?", userId).
+		Where("artist_id = ?", artistId).
+		Update("rating", rating).Error
 }

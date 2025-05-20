@@ -33,4 +33,6 @@ func Put_Rating(w http.ResponseWriter, req *http.Request) {
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
