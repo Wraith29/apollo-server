@@ -33,7 +33,7 @@ func loadLine(line string) error {
 	splitLine := strings.Split(line, "=")
 
 	if len(splitLine) != 2 {
-		return fmt.Errorf("invalid key/value pair: %s\n", line)
+		return fmt.Errorf("invalid key/value pair: %s", line)
 	}
 
 	return os.Setenv(splitLine[0], splitLine[1])

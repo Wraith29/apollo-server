@@ -21,7 +21,7 @@ services:
       database:
         condition: service_healthy
     environment:
-      - APOLLO_ENV="prod"
+      - APOLLO_ENV=prod
     env_file:
       - .env
       - .env.docker
