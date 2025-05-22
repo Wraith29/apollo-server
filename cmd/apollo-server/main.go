@@ -24,12 +24,14 @@ func main() {
 
 	server.AddRoute("POST /auth/register", api.Post_Register)
 	server.AddRoute("POST /auth/login", api.Post_Login)
-	server.AddAuthenticatedRoute("GET /auth/refresh", api.Get_Refresh)
-	server.AddAuthenticatedStatefulRoute("POST /artist", api.Post_Artist)
-	server.AddAuthenticatedStatefulRoute("POST /artist/update", api.Post_Update)
 
+	server.AddAuthenticatedRoute("GET /auth/refresh", api.Get_Refresh)
 	server.AddAuthenticatedRoute("GET /album/recommendation", api.Get_Recommendation)
 	server.AddAuthenticatedRoute("PUT /album/rating", api.Put_Rating)
+	server.AddAuthenticatedRoute("GET /artist", api.Get_Artists)
+
+	server.AddAuthenticatedStatefulRoute("POST /artist", api.Post_Artist)
+	server.AddAuthenticatedStatefulRoute("POST /artist/update", api.Post_Update)
 
 	fmt.Printf("Starting server on port 5000\n")
 

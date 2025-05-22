@@ -65,8 +65,6 @@ func Get_Recommendation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	println(bytes)
-
 	if _, err := w.Write(bytes); err != nil {
 		fmt.Printf("Error writing response: %+v\n", err)
 	}

@@ -75,3 +75,23 @@ func UpdateUserArtistRating(txn *gorm.DB, userId, artistId string) error {
 		Where("artist_id = ?", artistId).
 		Update("rating", rating).Error
 }
+
+type userArtistListItem struct {
+	ArtistName string
+	Rating     int
+}
+
+func GetAllUserArtistsForListing(userId string) ([]userArtistListItem, error) {
+	var artists []userArtistListItem
+
+	if err := conn.
+		Table("user_artists").
+		Select("artists.name AS artist_name", "user_artists.rating AS rating").
+		Where("user_id = ?", userId).
+		Joins("INNER JOIN artists ON artists.id = user_artists.artist_id").
+		Find(&artists).Error; err != nil {
+		return nil, err
+	}
+
+	return artists, nil
+}
