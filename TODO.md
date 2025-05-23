@@ -11,12 +11,12 @@
   - [ ] Remove
 - [x] Recommendation
   - [x] Get
-- [ ] List
+- [x] List
   *These will include the users rating*
-  - [ ] Artists
-  - [ ] Albums
+  - [x] Artists
+  - [x] Albums
   - [ ] Genres
-  - [ ] Recommendations
+  - [x] Recommendations
 
 ## Testing
 
