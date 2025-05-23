@@ -28,7 +28,10 @@ func main() {
 	server.AddAuthenticatedRoute("GET /auth/refresh", api.Get_Refresh)
 	server.AddAuthenticatedRoute("GET /album/recommendation", api.Get_Recommendation)
 	server.AddAuthenticatedRoute("PUT /album/rating", api.Put_Rating)
-	server.AddAuthenticatedRoute("GET /artist", api.Get_Artists)
+
+	server.AddAuthenticatedRoute("GET /artists", api.Get_ListArtists)
+	server.AddAuthenticatedRoute("GET /albums", api.Get_ListAlbums)
+	server.AddAuthenticatedRoute("GET /recommendations", api.Get_ListRecommendations)
 
 	server.AddAuthenticatedStatefulRoute("POST /artist", api.Post_Artist)
 	server.AddAuthenticatedStatefulRoute("POST /artist/update", api.Post_Update)

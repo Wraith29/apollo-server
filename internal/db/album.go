@@ -58,3 +58,25 @@ func GetUserAlbums(userId string, genres []string, includeRecommended bool) ([]R
 
 	return albums, err
 }
+
+type userAlbumListItem struct {
+	AlbumName  string
+	ArtistName string
+	Rating     int
+}
+
+func GetAllUserAlbumsForListing(userId string) ([]userAlbumListItem, error) {
+	var artists []userAlbumListItem
+
+	if err := conn.
+		Table("user_albums").
+		Select("albums.name AS album_name", "artists.name AS artist_name", "user_albums.rating AS rating").
+		Joins("INNER JOIN albums ON albums.id = user_albums.album_id").
+		Joins("INNER JOIN artists ON artists.id = albums.artist_id").
+		Where("user_id = ?", userId).
+		Find(&artists).Error; err != nil {
+		return nil, err
+	}
+
+	return artists, nil
+}
