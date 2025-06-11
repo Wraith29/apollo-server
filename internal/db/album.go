@@ -63,6 +63,7 @@ type userAlbumListItem struct {
 	AlbumName  string
 	ArtistName string
 	Rating     int
+	UpdatedAt  string
 }
 
 func GetAllUserAlbumsForListing(userId string) ([]userAlbumListItem, error) {
@@ -70,7 +71,7 @@ func GetAllUserAlbumsForListing(userId string) ([]userAlbumListItem, error) {
 
 	if err := conn.
 		Table("user_albums").
-		Select("albums.name AS album_name", "artists.name AS artist_name", "user_albums.rating AS rating").
+		Select("albums.name AS album_name", "artists.name AS artist_name", "user_albums.rating AS rating", "user_albums.updated_at AS updated_at").
 		Joins("INNER JOIN albums ON albums.id = user_albums.album_id").
 		Joins("INNER JOIN artists ON artists.id = albums.artist_id").
 		Where("user_id = ?", userId).
