@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -19,31 +20,46 @@ type authRequest struct {
 	Password string `json:"password"`
 }
 
+func (a *authRequest) fromBody(body io.ReadCloser) error {
+	if err := json.NewDecoder(body).Decode(&a); err != nil {
+		return err
+	}
+
+	if a.Username == "" {
+		return errors.New("missing required field: \"username\"")
+	}
+
+	if a.Password == "" {
+		return errors.New("missing required field: \"password\"")
+	}
+
+	return nil
+}
+
 type authResponse struct {
 	AuthToken string `json:"authToken"`
 }
 
 func Post_Register(w http.ResponseWriter, req *http.Request) {
-	var body authRequest
-
-	if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+	var ar authRequest
+	if err := ar.fromBody(req.Body); err != nil {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	usernameTaken := db.UsernameTaken(body.Username)
+	usernameTaken := db.UsernameTaken(ar.Username)
 	if usernameTaken {
-		writeError(w, http.StatusConflict, fmt.Errorf("username \"%s\" is taken", body.Username))
+		writeError(w, http.StatusConflict, fmt.Errorf("username \"%s\" is taken", ar.Username))
 		return
 	}
 
-	hashedPassword, err := hashPassword(body.Password)
+	hashedPassword, err := hashPassword(ar.Password)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	userId, err := db.SaveUser(body.Username, hashedPassword)
+	userId, err := db.SaveUser(ar.Username, hashedPassword)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err)
 		return
@@ -67,20 +83,19 @@ func hashPassword(password string) (string, error) {
 }
 
 func Post_Login(w http.ResponseWriter, req *http.Request) {
-	var body authRequest
-
-	if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+	var ar authRequest
+	if err := ar.fromBody(req.Body); err != nil {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	user, err := db.GetUserByUsername(body.Username)
+	user, err := db.GetUserByUsername(ar.Username)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(ar.Password)); err != nil {
 		writeError(w, http.StatusUnauthorized, errors.New("invalid username or password"))
 		return
 	}

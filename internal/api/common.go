@@ -6,9 +6,11 @@ import (
 )
 
 func writeError(w http.ResponseWriter, status int, err error) {
+	bytes := fmt.Appendf(nil, `{"err": "%s"}`, err.Error())
+
 	w.WriteHeader(status)
 
-	if _, err := w.Write([]byte(err.Error())); err != nil {
-		fmt.Println(err.Error())
+	if _, err := w.Write(bytes); err != nil {
+		fmt.Printf("error responding: %+v\n", err)
 	}
 }

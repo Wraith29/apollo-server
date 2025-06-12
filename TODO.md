@@ -1,7 +1,5 @@
 # TODO
 
-## Endpoints
-
 - [x] Auth
   - [x] Login
   - [x] Register
@@ -18,7 +16,13 @@
   - [ ] Genres
   - [x] Recommendations
 
-## Testing
-
 - [ ] General unit tests
 - [ ] Api testing
+
+- [ ] Improve logging / error handling
+
+> Rather than directly returning errors to the user
+> The app should handle them internally, logging
+> Them out to a file, and then returning
+> A relevant error to the user (i.e. information on the failure for bad req)
+> Or what has conflicted, or generic error message for internal server
