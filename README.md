@@ -68,3 +68,8 @@ To get the API & Database up and running.
 You can then access the API on `http://localhost:1300` (Or whatever you changed the API port to in the `docker-compose.yml`)
 
 And the database is accessible on port `1301` through PGAdmin4
+
+## Attributions
+
+All of the data used by Apollo comes from [MusicBrainz.org](https://musicbrainz.org),
+whose licensing information can be found [here](https://musicbrainz.org/doc/About/Data_License)

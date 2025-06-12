@@ -119,6 +119,8 @@ func Post_Artist(w http.ResponseWriter, req *http.Request, s *server) {
 	}
 
 	s.queue.Add(userId, body.ArtistName)
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 type updateRequest struct {
@@ -134,4 +136,6 @@ func Post_Update(w http.ResponseWriter, req *http.Request, s *server) {
 	}
 
 	s.queue.Update(body.ArtistId)
+
+	w.WriteHeader(http.StatusAccepted)
 }

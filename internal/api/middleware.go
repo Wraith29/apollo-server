@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	invalidToken = errors.New("invalid token")
-	expiredToken = errors.New("token has expired")
+	errInvalidToken = errors.New("invalid token")
+	errExpiredToken = errors.New("token has expired")
 )
 
 func parseAuthToken(header string) (*jwt.Token, error) {
@@ -22,17 +22,16 @@ func parseAuthToken(header string) (*jwt.Token, error) {
 
 	token, err := jwt.ParseWithClaims(header, &claims, func(tkn *jwt.Token) (any, error) {
 		if _, ok := tkn.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, invalidToken
+			return nil, errInvalidToken
 		}
 
-		//TODO: Replace this with an actual secret key
 		return []byte(os.Getenv("APOLLO_SECRET_KEY")), nil
 	})
 
 	if err != nil {
 		return nil, err
 	} else if !token.Valid {
-		return nil, invalidToken
+		return nil, errInvalidToken
 	}
 
 	expiry, err := claims.GetExpirationTime()
@@ -41,7 +40,7 @@ func parseAuthToken(header string) (*jwt.Token, error) {
 	}
 
 	if expiry.Before(time.Now()) {
-		return nil, expiredToken
+		return nil, errExpiredToken
 	}
 
 	return token, nil
@@ -56,7 +55,7 @@ func AuthenticationMiddleware(next http.Handler) http.HandlerFunc {
 		}
 
 		token, err := parseAuthToken(authHeader)
-		if err != nil && (errors.Is(err, invalidToken) || errors.Is(err, expiredToken)) {
+		if err != nil && (errors.Is(err, errInvalidToken) || errors.Is(err, errExpiredToken)) {
 			fmt.Printf("%+v\n", err)
 			writeError(w, http.StatusUnauthorized, err)
 			return
