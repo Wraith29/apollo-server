@@ -1,5 +1,3 @@
-# Api
-
 ## Authentication / Authorization
 
 Authenticated requests require that the `Authorization` header be present, with a valid JWT token as the value.
@@ -119,7 +117,7 @@ ENDPOINT: /artist/update
 AUTHENTICATED: Yes
 METHOD: POST
 BODY: {
-  "artistId": "artist-musicbrainz-id"
+  "artistId": "string"
 }
 ```
 
@@ -135,3 +133,23 @@ and any genre tags they have are accurate.
 > | 400  | `{"err": "an error message"}`   | The request body was invalid.                  |
 > | 401  | `{"err": "an error message"}`   | Something went wrong when trying to authorize. |
 > | 500  | `{"err": "an error message"}`   | Something went wrong on the server side.       |
+
+## Albums
+
+### Getting a Recommendation
+
+**Request**
+
+```
+ENDPOINT: /album/recommendation
+AUTHENTICATED: Yes
+METHOD: GET
+QUERY: {
+  "genres": "string,string",
+  "includeListened": "bool"
+}
+```
+
+Get an album recommended from your personal collection.
+
+With no query passed in, this will find any album you have 
